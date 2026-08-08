@@ -310,6 +310,36 @@ html,body{{ margin:0; padding:0; }}
     }
 
 
+def render_cover_preview_html(cover_frage, bild_b64=None, theme="klassisch"):
+    """
+    Baut eine kompakte Vorschau NUR von Slide 1 (Cover) - z.B. um ein
+    generiertes Cover-Bild direkt im Zusammenspiel mit Logo/Ueberschrift
+    zu pruefen, ohne gleich alle 9 Slides generieren zu muessen.
+    """
+    green_override = THEMES[theme]
+    slide = build_cover_slide(cover_frage, bild_b64=bild_b64)
+    slide_html = make_slide_div(0, slide, active=True)
+    return f"""<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+{STYLE_BLOCK}
+{green_override}
+html, body{{ margin:0; padding:0; background:transparent; }}
+body{{ display:flex; justify-content:center; }}
+</style>
+</head>
+<body>
+<div class="preview-wrap">
+{slide_html}
+</div>
+</body>
+</html>"""
+
+
 def export_pngs(slide_html_paths):
     """
     Wandelt die Export-HTML-Dateien einer Slide-Liste (aus render_carousel(),

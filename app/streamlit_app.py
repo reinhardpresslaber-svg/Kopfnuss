@@ -18,7 +18,7 @@ import streamlit as st
 from post_historie import check_topic, append_post
 from research_module import research_thema
 from text_module import generate_cover_optionen, generate_slides_und_caption, assemble_slides
-from render_module import render_carousel, export_pngs
+from render_module import render_carousel, export_pngs, render_cover_preview_html
 from image_module import generate_cover_bild
 
 st.set_page_config(page_title="Kopfnuss Post-Generator", page_icon="🥜", layout="centered")
@@ -101,7 +101,9 @@ if st.session_state.cover_optionen:
             st.session_state.cover_bild_bytes = generate_cover_bild(cover_frage)
 
     if st.session_state.cover_bild_bytes:
-        st.image(st.session_state.cover_bild_bytes, caption="Wird transparent hinter Logo/Ueberschrift gelegt", width=300)
+        bild_b64_preview = base64.b64encode(st.session_state.cover_bild_bytes).decode("ascii")
+        preview_html = render_cover_preview_html(cover_frage, bild_b64=bild_b64_preview, theme=farbthema)
+        st.components.v1.html(preview_html, height=460)
 
     if st.button("Slides & Caption generieren"):
         with st.spinner("Claude schreibt die Slides 2-8, das Fazit und die Caption..."):
