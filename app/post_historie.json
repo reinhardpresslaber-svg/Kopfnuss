@@ -1,0 +1,98 @@
+[
+  {
+    "slug": "01_gelernte_hilflosigkeit",
+    "thema": "Gelernte Hilflosigkeit",
+    "cover_frage": "Warum manche Menschen aufhören, es überhaupt zu versuchen.",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "klassisch"
+  },
+  {
+    "slug": "02_eustress_distress",
+    "thema": "Eustress vs. Distress",
+    "cover_frage": "Warum macht dich Stress manchmal stärker – und manchmal kaputt?",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "klassisch"
+  },
+  {
+    "slug": "03_lazarus_stress",
+    "thema": "Lazarus' transaktionales Stressmodell",
+    "cover_frage": "Warum stresst dich eine Situation – und deinen Kollegen nicht?",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "klassisch"
+  },
+  {
+    "slug": "04_virtual_stress_test",
+    "thema": "Open TSST-VR / Virtueller Stresstest",
+    "cover_frage": "Kannst du dich in einer virtuellen Welt genauso stressen wie im echten Leben?",
+    "datum": null,
+    "quelle": "Linnig et al. (2024)",
+    "farbthema": "gruen"
+  },
+  {
+    "slug": "05_resource_study",
+    "thema": "ReSource-Projekt & Cortisol",
+    "cover_frage": "Kannst du deinen Stresspegel senken, indem du an andere denkst statt an dich selbst?",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "gruen"
+  },
+  {
+    "slug": "06_vierseiten_svt",
+    "thema": "Vier-Seiten-Modell (Kommunikation)",
+    "cover_frage": "Hörst du manchmal auch etwas ganz anderes, als eigentlich gesagt wurde?",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "gruen"
+  },
+  {
+    "slug": "07_impostor",
+    "thema": "Impostor-Syndrom",
+    "cover_frage": "Hast du Angst, dass alle irgendwann merken, dass du es eigentlich nicht drauf hast?",
+    "datum": null,
+    "quelle": "Clance & Imes (1978)",
+    "farbthema": "klassisch"
+  },
+  {
+    "slug": "08_satisfycing",
+    "thema": "Satisficing (Entscheidungsfindung)",
+    "cover_frage": "Warum kluge Menschen die schlechteste Entscheidung treffen: die perfekte suchen",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "klassisch"
+  },
+  {
+    "slug": "09_prospect_theory",
+    "thema": "Prospect Theory",
+    "cover_frage": "Warum schmerzt Verlieren mehr, als Gewinnen glücklich macht?",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "klassisch"
+  },
+  {
+    "slug": "10_surprisereachingout",
+    "thema": "The Surprise of Reaching Out",
+    "cover_frage": "Warum trauen wir uns nicht, uns einfach mal zu melden?",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "gruen"
+  },
+  {
+    "slug": "11_empathy_gap",
+    "thema": "Empathy Gap",
+    "cover_frage": "Du denkst, den anderen ist es egal, wie's dir geht?",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "gruen"
+  },
+  {
+    "slug": "Handyverzicht",
+    "thema": "Handyverzicht / Digital Detox",
+    "cover_frage": "Wirken 2 Wochen ohne Handy-Internet stärker als ein Antidepressivum?",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "klassisch"
+  }
+]
