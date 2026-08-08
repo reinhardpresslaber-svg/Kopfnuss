@@ -10,6 +10,7 @@ mitgegeben wird.
 """
 
 import os
+import re
 
 import anthropic
 from dotenv import load_dotenv
@@ -143,9 +144,24 @@ SLIDES_TOOL = {
 }
 
 
+_CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+
+
+def _clean(value):
+    """Entfernt vereinzelt auftretende Steuerzeichen (z.B. \\r), die Claude
+    manchmal statt eines Sonderzeichens wie eines Gedankenstrichs erzeugt."""
+    if isinstance(value, str):
+        return _CONTROL_CHARS.sub("", value)
+    if isinstance(value, list):
+        return [_clean(v) for v in value]
+    if isinstance(value, dict):
+        return {k: _clean(v) for k, v in value.items()}
+    return value
+
+
 def _tool_input(resp):
     tool_use = next(b for b in resp.content if b.type == "tool_use")
-    return tool_use.input
+    return _clean(tool_use.input)
 
 
 def generate_cover_optionen(thema, kontext=""):
