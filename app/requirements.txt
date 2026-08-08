@@ -3,3 +3,4 @@ google-genai==2.17.0
 python-dotenv==1.2.2
 requests==2.34.2
 streamlit==1.61.1
+playwright==1.62.0

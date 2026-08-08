@@ -5,18 +5,21 @@ Verbindet die bereits fertigen Module zu einem klickbaren Ablauf:
 Thema eingeben -> Cover-Frage waehlen -> Slides & Caption generieren
 -> Vorschau ansehen.
 
-Noch NICHT eingebaut: Bild-Modul, PNG-Export (wkhtmltoimage fehlt noch)
-- kommt in spaeteren Schritten.
+Noch NICHT eingebaut: Bild-Modul (eigenes Cover-Bild statt reinem Text)
+- kommt in einem spaeteren Schritt.
 """
 
+import io
+import os
 import re
+import zipfile
 
 import streamlit as st
 
 from post_historie import check_topic, append_post
 from research_module import research_thema
 from text_module import generate_cover_optionen, generate_slides_und_caption, assemble_slides
-from render_module import render_carousel
+from render_module import render_carousel, export_pngs
 
 st.set_page_config(page_title="Kopfnuss Post-Generator", page_icon="🥜", layout="centered")
 st.title("🥜 Kopfnuss Post-Generator")
@@ -42,6 +45,7 @@ for key, default in [
     ("cover_frage", ""),
     ("slides_ergebnis", None),
     ("render_ergebnis", None),
+    ("png_paths", None),
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -103,6 +107,7 @@ if st.session_state.cover_optionen:
         st.session_state.cover_frage = cover_frage
         st.session_state.slides_ergebnis = ergebnis
         st.session_state.render_ergebnis = render_ergebnis
+        st.session_state.png_paths = None
 
 if st.session_state.render_ergebnis:
     st.header("4. Vorschau")
@@ -110,7 +115,27 @@ if st.session_state.render_ergebnis:
         html = f.read()
     st.components.v1.html(html, height=800, scrolling=True)
 
-    st.header("5. Caption")
+    st.header("5. PNGs erzeugen")
+    if st.button("9 PNGs erzeugen"):
+        with st.spinner("Erzeuge Screenshots der 9 Slides..."):
+            st.session_state.png_paths = export_pngs(st.session_state.render_ergebnis["slide_htmls"])
+
+    if st.session_state.png_paths:
+        st.success(f"{len(st.session_state.png_paths)} PNGs erzeugt.")
+        st.image(st.session_state.png_paths, width=150)
+
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zf:
+            for png_path in st.session_state.png_paths:
+                zf.write(png_path, arcname=os.path.basename(png_path))
+        st.download_button(
+            "Alle 9 PNGs als ZIP herunterladen",
+            data=zip_buffer.getvalue(),
+            file_name=f"kopfnuss_{slugify(thema)}.zip",
+            mime="application/zip",
+        )
+
+    st.header("6. Caption")
     st.text_area("Caption (zum Kopieren)", st.session_state.slides_ergebnis["caption"], height=200)
 
     if st.button("Als fertigen Post in der Historie speichern"):

@@ -270,12 +270,12 @@ def render_carousel(slides, topic_slug, topic_title, theme="klassisch", output_d
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 {style}
 {green_override}
 html,body{{ margin:0; padding:0; }}
-*{{ font-family:'DejaVu Sans', sans-serif !important; }}
-.headline, .cover-sub, .item h4 {{ font-family:'DejaVu Serif', serif !important; }}
 .slide{{ display:block !important; transform:none !important; width:1080px !important; height:1350px !important; background:{bg} !important; }}
 </style>
 </head>
@@ -299,3 +299,30 @@ html,body{{ margin:0; padding:0; }}
         "export_dir": export_dir,
         "slide_htmls": slide_html_paths,
     }
+
+
+def export_pngs(slide_html_paths):
+    """
+    Wandelt die Export-HTML-Dateien einer Slide-Liste (aus render_carousel(),
+    "slide_htmls") in echte PNG-Dateien um - per Playwright (ein unsichtbarer
+    Chrome-Browser macht einen 1080x1350px-Screenshot jeder Slide).
+
+    Gibt die Liste der erzeugten PNG-Pfade zurueck (gleicher Ordner, gleicher
+    Dateiname, nur mit .png statt .html).
+    """
+    from pathlib import Path
+
+    from playwright.sync_api import sync_playwright
+
+    png_paths = []
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1080, "height": 1350})
+        for html_path in slide_html_paths:
+            page.goto(Path(html_path).resolve().as_uri())
+            page.wait_for_load_state("networkidle")
+            png_path = os.path.splitext(html_path)[0] + ".png"
+            page.screenshot(path=png_path)
+            png_paths.append(png_path)
+        browser.close()
+    return png_paths
