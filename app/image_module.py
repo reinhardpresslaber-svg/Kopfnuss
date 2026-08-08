@@ -30,13 +30,13 @@ PROMPT_TEMPLATE = """Erstelle ein einzelnes, freigestelltes Icon-/Diagramm-Motiv
 Zentrale Frage/Thema des Motivs: "{cover_frage}"
 
 Stil (wichtig, genau einhalten):
-- Sehr duenne, filigrane Linienzeichnung, wie eine wissenschaftliche/schematische Diagramm-Illustration - KEINE dicken, saettigten Flaechen
+- Flaches Icon-Design: eine Mischung aus duennen Linien UND ausgefuellten/flaechigen Formen (nicht nur Umrisse) - wie ein modernes Icon-Set, nicht wie eine Bleistiftskizze
 - Symbolisch/diagrammatisch statt narrativ: 2-4 kleine, klar erkennbare Einzelsymbole/Icons, die das Thema andeuten (z.B. ein Diagramm mit Achsen, ein Objekt-Icon, Zahnraeder, ein Kopf-Symbol, Verbindungslinien/gepunktete Linien zwischen Elementen) - KEINE erzaehlte Szene, KEINE Comic-Charaktere mit Gesicht/Mimik
-- Sehr reduziert, viel Leerraum zwischen den einzelnen Symbolen
-- Alles wirkt leicht, luftig, skizzenhaft, kein Fotorealismus, keine 3D-Effekte, keine harten Schatten
-- KEINERLEI Buchstaben, Woerter oder Zahlen im Bild (ein einzelnes Satzzeichen wie "?" ist erlaubt, aber keine Woerter/Beschriftungen)
+- Reduziert, viel Leerraum zwischen den einzelnen Symbolen
+- Kein Fotorealismus, keine 3D-Effekte, keine harten Schatten
+- UNBEDINGT BEACHTEN: Das Bild darf UNTER KEINEN UMSTAENDEN Text enthalten - keine Buchstaben, Woerter, Beschriftungen, Labels oder Zahlen, auch nicht auf Schildern, Kaestchen oder Objekten im Bild. Zeichne ausschliesslich reine Formen/Symbole/Icons OHNE jede Schrift. Ein einzelnes Satzzeichen wie "?" ist die einzige Ausnahme.
 
-Farbpalette (NUR diese Farben verwenden, aber SEHR blass/gedaempft/halbtransparent wirkend - duenne Outlines, Flaechen nur wie mit 20-30% Deckkraft):
+Farbpalette (NUR diese Farben verwenden, dabei kraeftig/satt und praesent einsetzen - keine ausgeblassten/verwaschenen Toene, ruhig auch groessere ausgefuellte Flaechen in diesen Farben):
 - Terrakotta: #C15A2E
 - Salbeigruen: #8FBFA0
 - Dunkelgruen: #2E4A3B
@@ -46,7 +46,9 @@ Hintergrund: WICHTIG - der komplette Hintergrund muss eine einzige, absolut glei
 
 Komposition:
 - Format 4:5 Hochformat (1080x1350px)
-- Die Symbole duerfen grosszuegig ueber die Flaeche verteilt sein, auch dort wo spaeter Logo/Ueberschrift als Text darueber liegen werden - das ist gewollt (die Linien sind duenn und blass genug, dass der Text trotzdem gut lesbar bleibt). Nur die direkten Bildraender (ca. 60px) bleiben frei.
+- WICHTIG: Der Schwerpunkt/die Hauptmasse der Symbole liegt klar in der RECHTEN Bildhaelfte. Im linken oberen Bereich (dort sitzt spaeter ein Logo, ca. bei 15-35% der Bildbreite/-hoehe) duerfen bestenfalls einzelne duenne Linien durchlaufen, aber keine dichten/dominanten Formen - dieser Bereich soll sichtbar leerer wirken als die rechte Seite.
+- Weiter unten (dort wo die Ueberschrift als Text liegt) duerfen die Symbole ueber die ganze Breite verteilt sein, da die Linien duenn und blass genug sind, dass der Text trotzdem gut lesbar bleibt.
+- Nur die direkten Bildraender (ca. 60px) bleiben komplett frei.
 """
 
 
@@ -88,11 +90,45 @@ def _remove_chroma_key(img, key_color=CHROMA_KEY, tolerance=60, feather=40):
     return Image.fromarray(data, "RGBA")
 
 
-def _fit_to_canvas(img, width, height):
+def _clear_left_zone(img, fraction=0.37):
+    """
+    Loescht (macht transparent) den linken Bildbereich hart, egal was
+    dort generiert wurde - verlaesslicher als sich nur auf die
+    Prompt-Anweisung "Schwerpunkt rechts" zu verlassen, da Gemini
+    gelegentlich trotzdem einzelne Icons/Linien links platziert.
+    """
+    data = np.array(img)
+    cut = round(img.width * fraction)
+    data[:, :cut, 3] = 0
+    return Image.fromarray(data, "RGBA")
+
+
+def _trim_transparent(img, padding=30):
+    """
+    Schneidet ueberschuessigen transparenten Rand um das eigentliche
+    Motiv herum ab, damit es beim Einpassen in die Zielgroesse (via
+    _fit_to_canvas) moeglichst gross erscheint statt von unsichtbarem
+    Leerraum umgeben zu sein.
+    """
+    bbox = img.getchannel("A").getbbox()
+    if bbox is None:
+        return img
+    left, top, right, bottom = bbox
+    left = max(0, left - padding)
+    top = max(0, top - padding)
+    right = min(img.width, right + padding)
+    bottom = min(img.height, bottom + padding)
+    return img.crop((left, top, right, bottom))
+
+
+def _fit_to_canvas(img, width, height, x_bias=0.5):
     """
     Skaliert ein Bild so, dass es komplett hineinpasst (nichts wird
-    abgeschnitten), und zentriert es auf einer transparenten Leinwand
+    abgeschnitten), und platziert es auf einer transparenten Leinwand
     der Zielgroesse (1080x1350, passend zur vollen Slide-Flaeche).
+    x_bias verschiebt die horizontale Position leicht nach rechts
+    (0.5 = mittig, 1.0 = ganz rechts), damit der Bildschwerpunkt zur
+    rechtslastigen Komposition passt statt streng zentriert zu wirken.
     """
     img_ratio = img.width / img.height
     target_ratio = width / height
@@ -104,10 +140,21 @@ def _fit_to_canvas(img, width, height):
         new_width = round(height * img_ratio)
     img = img.resize((new_width, new_height), Image.LANCZOS)
     canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    left = (width - new_width) // 2
+    left = round((width - new_width) * x_bias)
     top = (height - new_height) // 2
     canvas.paste(img, (left, top), img)
     return canvas
+
+
+def _clean_resize_haze(img):
+    """
+    Entfernt einen leichten Schleier, der beim Hochskalieren (LANCZOS)
+    an transparenten Kanten entstehen kann - alles unterhalb eines
+    Alpha-Schwellwerts wird komplett durchsichtig statt leicht sichtbar.
+    """
+    data = np.array(img)
+    data[:, :, 3] = np.where(data[:, :, 3] < 25, 0, data[:, :, 3])
+    return Image.fromarray(data, "RGBA")
 
 
 def generate_cover_bild(cover_frage):
@@ -132,7 +179,10 @@ def generate_cover_bild(cover_frage):
             img = Image.open(io.BytesIO(part.inline_data.data)).convert("RGB")
             key_color = _sample_corner_color(img)
             img = _remove_chroma_key(img, key_color=key_color)
+            img = _trim_transparent(img)
             img = _fit_to_canvas(img, 1080, 1350)
+            img = _clear_left_zone(img)
+            img = _clean_resize_haze(img)
             buf = io.BytesIO()
             img.save(buf, format="PNG")
             return buf.getvalue()
