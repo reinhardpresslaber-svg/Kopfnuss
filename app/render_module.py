@@ -8,7 +8,9 @@ Gleiche Logik wie das urspruengliche Projektvorgaben/build_carousel.py, aber
 als aufrufbare Funktion statt Skript mit fest eingetragenen Texten.
 """
 
+import html as html_module
 import os
+import re
 
 ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
 
@@ -365,3 +367,106 @@ def export_pngs(slide_html_paths):
             png_paths.append(png_path)
         browser.close()
     return png_paths
+
+
+_TRIO_ITEM_RE = re.compile(r'<div class="item"><h4>(.*?)</h4><p>(.*?)</p></div>', re.DOTALL)
+_HEADLINE_RE = re.compile(r'<div class="headline"[^>]*>(?P<headline>.*?)</div>', re.DOTALL)
+_CARD_RE = re.compile(
+    r'<div class="content-mid"[^>]*>\s*<div class="headline"[^>]*>(?P<headline>.*?)</div>\s*'
+    r'<div class="card">\s*<p class="body-text"[^>]*>(?P<body>.*?)</p>\s*</div>\s*</div>',
+    re.DOTALL,
+)
+_SIMPLE_RE = re.compile(
+    r'<div class="content-mid"[^>]*>\s*<div class="headline"[^>]*>(?P<headline>.*?)</div>\s*'
+    r'<p class="body-text"[^>]*>(?P<body>.*?)</p>\s*</div>',
+    re.DOTALL,
+)
+
+
+def parse_slide_body(body_html):
+    """
+    Zerlegt den HTML-Body einer Slide (2-8) in einfache Textfelder zur
+    Bearbeitung - erkennt die 3 Baukasten-Varianten aus text_module.py
+    (einfacher Text, Beispiel-Karte, Drei-Punkte-Vergleich). Unbekannte
+    Struktur wird unveraendert als Rohtext durchgereicht (type "raw"),
+    damit nichts verloren geht.
+    """
+    if '<div class="trio">' in body_html:
+        items = _TRIO_ITEM_RE.findall(body_html)
+        headline_m = _HEADLINE_RE.search(body_html)
+        if len(items) == 3 and headline_m:
+            return {
+                "type": "trio",
+                "headline": html_module.unescape(headline_m.group("headline")).strip(),
+                "items": [
+                    {"titel": html_module.unescape(t).strip(), "text": html_module.unescape(p).strip()}
+                    for t, p in items
+                ],
+            }
+    if '<div class="card">' in body_html:
+        m = _CARD_RE.search(body_html)
+        if m:
+            return {
+                "type": "card",
+                "headline": html_module.unescape(m.group("headline")).strip(),
+                "body": html_module.unescape(m.group("body")).strip(),
+            }
+    m = _SIMPLE_RE.search(body_html)
+    if m:
+        return {
+            "type": "simple",
+            "headline": html_module.unescape(m.group("headline")).strip(),
+            "body": html_module.unescape(m.group("body")).strip(),
+        }
+    return {"type": "raw", "html": body_html}
+
+
+def build_slide_body(parsed):
+    """Baut aus den (moeglicherweise bearbeiteten) Textfeldern wieder den
+    HTML-Body zusammen - Gegenstueck zu parse_slide_body()."""
+    if parsed["type"] == "trio":
+        items_html = "".join(
+            f'<div class="item"><h4>{html_module.escape(item["titel"])}</h4>'
+            f'<p>{html_module.escape(item["text"])}</p></div>'
+            for item in parsed["items"]
+        )
+        return (
+            '<div class="content-mid">\n'
+            f'  <div class="headline">{html_module.escape(parsed["headline"])}</div>\n'
+            f'  <div class="trio">{items_html}</div>\n'
+            "</div>"
+        )
+    if parsed["type"] == "card":
+        return (
+            '<div class="content-mid">\n'
+            f'  <div class="headline">{html_module.escape(parsed["headline"])}</div>\n'
+            '  <div class="card">\n'
+            f'    <p class="body-text" style="margin-top:0;">{html_module.escape(parsed["body"])}</p>\n'
+            "  </div>\n"
+            "</div>"
+        )
+    if parsed["type"] == "simple":
+        return (
+            '<div class="content-mid">\n'
+            f'  <div class="headline">{html_module.escape(parsed["headline"])}</div>\n'
+            f'  <p class="body-text">{html_module.escape(parsed["body"])}</p>\n'
+            "</div>"
+        )
+    return parsed["html"]
+
+
+_FAZIT_RE = re.compile(r'<p class="body-text"[^>]*>(?P<body>.*?)</p>', re.DOTALL)
+
+
+def parse_fazit_body(fazit_html):
+    """Extrahiert den reinen Text aus dem Fazit-Paragraph (Slide 9)."""
+    m = _FAZIT_RE.search(fazit_html)
+    if m:
+        return html_module.unescape(m.group("body")).strip()
+    return fazit_html
+
+
+def build_fazit_body(text):
+    """Baut den Fazit-Paragraph (Slide 9) aus reinem Text - Gegenstueck
+    zu parse_fazit_body()."""
+    return f'<p class="body-text">{html_module.escape(text)}</p>'

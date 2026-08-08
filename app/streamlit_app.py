@@ -18,7 +18,15 @@ import streamlit as st
 from post_historie import check_topic, append_post
 from research_module import research_thema
 from text_module import generate_cover_optionen, generate_slides_und_caption, assemble_slides
-from render_module import render_carousel, export_pngs, render_cover_preview_html
+from render_module import (
+    render_carousel,
+    export_pngs,
+    render_cover_preview_html,
+    parse_slide_body,
+    build_slide_body,
+    parse_fazit_body,
+    build_fazit_body,
+)
 from image_module import generate_cover_bild
 
 st.set_page_config(page_title="Kopfnuss Post-Generator", page_icon="🥜", layout="centered")
@@ -113,8 +121,14 @@ if st.session_state.cover_optionen:
         st.session_state.png_paths = None
         for i in range(2, 9):
             st.session_state.pop(f"label_{i}", None)
+            st.session_state.pop(f"headline_{i}", None)
+            st.session_state.pop(f"bodytext_{i}", None)
             st.session_state.pop(f"body_{i}", None)
+            for j in range(3):
+                st.session_state.pop(f"trio_titel_{i}_{j}", None)
+                st.session_state.pop(f"trio_text_{i}_{j}", None)
         st.session_state.pop("fazit_body_edit", None)
+        st.session_state.pop("caption_edit", None)
 
     if st.session_state.slides_ergebnis:
         st.header("5. Texte bearbeiten (optional)")
@@ -123,23 +137,51 @@ if st.session_state.cover_optionen:
             titel = f"Slide {i}" + (f" – {s['label']}" if s.get("label") else "")
             with st.expander(titel):
                 st.text_input("Label", value=s["label"], key=f"label_{i}")
-                st.text_area("HTML-Body", value=s["body"], height=180, key=f"body_{i}")
-        st.text_area("Fazit-Text (Slide 9)", value=ergebnis["fazit_body"], height=100, key="fazit_body_edit")
+                parsed = parse_slide_body(s["body"])
+                if parsed["type"] == "trio":
+                    st.text_input("Überschrift", value=parsed["headline"], key=f"headline_{i}")
+                    for j, item in enumerate(parsed["items"]):
+                        col1, col2 = st.columns([1, 2])
+                        col1.text_input(f"Punkt {j + 1} – Titel", value=item["titel"], key=f"trio_titel_{i}_{j}")
+                        col2.text_input(f"Punkt {j + 1} – Text", value=item["text"], key=f"trio_text_{i}_{j}")
+                elif parsed["type"] in ("card", "simple"):
+                    st.text_input("Überschrift", value=parsed["headline"], key=f"headline_{i}")
+                    st.text_area("Text", value=parsed["body"], height=100, key=f"bodytext_{i}")
+                else:
+                    st.caption("Unbekanntes Format - hier bleibt der HTML-Code sichtbar.")
+                    st.text_area("HTML-Body", value=parsed["html"], height=180, key=f"body_{i}")
+        fazit_text = parse_fazit_body(ergebnis["fazit_body"])
+        st.text_area("Fazit-Text (Slide 9)", value=fazit_text, height=100, key="fazit_body_edit")
 
         if st.button("Vorschau rendern"):
             with st.spinner("Baue die Vorschau..."):
-                slides_2_bis_8 = [
-                    {"label": st.session_state[f"label_{i}"], "body": st.session_state[f"body_{i}"]}
-                    for i in range(2, 9)
-                ]
+                slides_2_bis_8 = []
+                for i, s in enumerate(ergebnis["slides_2_bis_8"], start=2):
+                    parsed = parse_slide_body(s["body"])
+                    if parsed["type"] == "trio":
+                        parsed["headline"] = st.session_state[f"headline_{i}"]
+                        parsed["items"] = [
+                            {
+                                "titel": st.session_state[f"trio_titel_{i}_{j}"],
+                                "text": st.session_state[f"trio_text_{i}_{j}"],
+                            }
+                            for j in range(3)
+                        ]
+                    elif parsed["type"] in ("card", "simple"):
+                        parsed["headline"] = st.session_state[f"headline_{i}"]
+                        parsed["body"] = st.session_state[f"bodytext_{i}"]
+                    else:
+                        parsed["html"] = st.session_state[f"body_{i}"]
+                    slides_2_bis_8.append(
+                        {"label": st.session_state[f"label_{i}"], "body": build_slide_body(parsed)}
+                    )
+                fazit_body = build_fazit_body(st.session_state["fazit_body_edit"])
                 bild_b64 = (
                     base64.b64encode(st.session_state.cover_bild_bytes).decode("ascii")
                     if st.session_state.cover_bild_bytes
                     else None
                 )
-                slides = assemble_slides(
-                    cover_frage, slides_2_bis_8, st.session_state["fazit_body_edit"], bild_b64=bild_b64
-                )
+                slides = assemble_slides(cover_frage, slides_2_bis_8, fazit_body, bild_b64=bild_b64)
                 slug = slugify(thema)
                 render_ergebnis = render_carousel(
                     slides=slides,
@@ -166,19 +208,23 @@ if st.session_state.render_ergebnis:
         st.success(f"{len(st.session_state.png_paths)} PNGs erzeugt.")
         st.image(st.session_state.png_paths, width=150)
 
+        aktuelle_caption = st.session_state.get("caption_edit", st.session_state.slides_ergebnis["caption"])
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w") as zf:
             for png_path in st.session_state.png_paths:
                 zf.write(png_path, arcname=os.path.basename(png_path))
+            zf.writestr("caption.txt", aktuelle_caption)
         st.download_button(
-            "Alle 9 PNGs als ZIP herunterladen",
+            "Alle 9 PNGs + Caption als ZIP herunterladen",
             data=zip_buffer.getvalue(),
             file_name=f"kopfnuss_{slugify(thema)}.zip",
             mime="application/zip",
         )
 
     st.header("8. Caption")
-    st.text_area("Caption (zum Kopieren)", st.session_state.slides_ergebnis["caption"], height=200)
+    st.text_area(
+        "Caption (zum Kopieren)", st.session_state.slides_ergebnis["caption"], height=200, key="caption_edit"
+    )
 
     if st.button("Als fertigen Post in der Historie speichern"):
         r = st.session_state.recherche
