@@ -107,33 +107,57 @@ if st.session_state.cover_optionen:
 
     if st.button("Slides & Caption generieren"):
         with st.spinner("Claude schreibt die Slides 2-8, das Fazit und die Caption..."):
-            ergebnis = generate_slides_und_caption(thema, cover_frage, kontext=kontext)
-            bild_b64 = (
-                base64.b64encode(st.session_state.cover_bild_bytes).decode("ascii")
-                if st.session_state.cover_bild_bytes
-                else None
-            )
-            slides = assemble_slides(cover_frage, ergebnis["slides_2_bis_8"], ergebnis["fazit_body"], bild_b64=bild_b64)
-            slug = slugify(thema)
-            render_ergebnis = render_carousel(
-                slides=slides,
-                topic_slug=slug,
-                topic_title=thema,
-                theme=farbthema,
-                output_dir=f"_preview_{slug}",
-            )
+            st.session_state.slides_ergebnis = generate_slides_und_caption(thema, cover_frage, kontext=kontext)
         st.session_state.cover_frage = cover_frage
-        st.session_state.slides_ergebnis = ergebnis
-        st.session_state.render_ergebnis = render_ergebnis
+        st.session_state.render_ergebnis = None
         st.session_state.png_paths = None
+        for i in range(2, 9):
+            st.session_state.pop(f"label_{i}", None)
+            st.session_state.pop(f"body_{i}", None)
+        st.session_state.pop("fazit_body_edit", None)
+
+    if st.session_state.slides_ergebnis:
+        st.header("5. Texte bearbeiten (optional)")
+        ergebnis = st.session_state.slides_ergebnis
+        for i, s in enumerate(ergebnis["slides_2_bis_8"], start=2):
+            titel = f"Slide {i}" + (f" – {s['label']}" if s.get("label") else "")
+            with st.expander(titel):
+                st.text_input("Label", value=s["label"], key=f"label_{i}")
+                st.text_area("HTML-Body", value=s["body"], height=180, key=f"body_{i}")
+        st.text_area("Fazit-Text (Slide 9)", value=ergebnis["fazit_body"], height=100, key="fazit_body_edit")
+
+        if st.button("Vorschau rendern"):
+            with st.spinner("Baue die Vorschau..."):
+                slides_2_bis_8 = [
+                    {"label": st.session_state[f"label_{i}"], "body": st.session_state[f"body_{i}"]}
+                    for i in range(2, 9)
+                ]
+                bild_b64 = (
+                    base64.b64encode(st.session_state.cover_bild_bytes).decode("ascii")
+                    if st.session_state.cover_bild_bytes
+                    else None
+                )
+                slides = assemble_slides(
+                    cover_frage, slides_2_bis_8, st.session_state["fazit_body_edit"], bild_b64=bild_b64
+                )
+                slug = slugify(thema)
+                render_ergebnis = render_carousel(
+                    slides=slides,
+                    topic_slug=slug,
+                    topic_title=thema,
+                    theme=farbthema,
+                    output_dir=f"_preview_{slug}",
+                )
+            st.session_state.render_ergebnis = render_ergebnis
+            st.session_state.png_paths = None
 
 if st.session_state.render_ergebnis:
-    st.header("5. Vorschau")
+    st.header("6. Vorschau")
     with open(st.session_state.render_ergebnis["preview_html"], encoding="utf-8") as f:
         html = f.read()
     st.components.v1.html(html, height=800, scrolling=True)
 
-    st.header("6. PNGs erzeugen")
+    st.header("7. PNGs erzeugen")
     if st.button("9 PNGs erzeugen"):
         with st.spinner("Erzeuge Screenshots der 9 Slides..."):
             st.session_state.png_paths = export_pngs(st.session_state.render_ergebnis["slide_htmls"])
@@ -153,7 +177,7 @@ if st.session_state.render_ergebnis:
             mime="application/zip",
         )
 
-    st.header("7. Caption")
+    st.header("8. Caption")
     st.text_area("Caption (zum Kopieren)", st.session_state.slides_ergebnis["caption"], height=200)
 
     if st.button("Als fertigen Post in der Historie speichern"):
