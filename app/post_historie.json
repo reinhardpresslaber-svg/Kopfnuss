@@ -94,5 +94,13 @@
     "datum": null,
     "quelle": null,
     "farbthema": "klassisch"
+  },
+  {
+    "slug": "leistungsmotivation",
+    "thema": "leistungsmotivation",
+    "cover_frage": "Willst du gewinnen – oder nur nicht verlieren?",
+    "datum": null,
+    "quelle": null,
+    "farbthema": "klassisch"
   }
 ]

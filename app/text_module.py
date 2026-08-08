@@ -90,8 +90,7 @@ COVER_TOOL = {
             "vorschlaege": {
                 "type": "array",
                 "items": {"type": "string"},
-                "minItems": 3,
-                "maxItems": 3,
+                "description": "Genau 3 Formulierungsvorschlaege.",
             }
         },
         "required": ["vorschlaege"],
@@ -108,8 +107,7 @@ SLIDES_TOOL = {
         "properties": {
             "slides_2_bis_8": {
                 "type": "array",
-                "minItems": 7,
-                "maxItems": 7,
+                "description": "Genau 7 Slide-Objekte (fuer Slides 2 bis 8).",
                 "items": {
                     "type": "object",
                     "properties": {
@@ -176,9 +174,10 @@ def generate_slides_und_caption(thema, cover_frage, kontext=""):
         f"Thema: {thema}\n"
         f"Freigegebene Cover-Frage (Slide 1): {cover_frage}\n\n"
         + (f"Rechercheergebnisse/Kontext:\n{kontext}\n\n" if kontext else "")
-        + "Erzeuge jetzt Slides 2 bis 8 (Beispiel -> Kerngedanke/Definition -> "
-        "Mechanismus in mehreren Teilen -> Aha-Satz -> Alltagsrelevanz, siehe "
-        "Design-System Abschnitt 1), den Fazit-Text fuer Slide 9 sowie die Caption. "
+        + "Erzeuge jetzt genau 7 Slides fuer die Positionen 2 bis 8 (Beispiel -> "
+        "Kerngedanke/Definition -> Mechanismus in mehreren Teilen -> Aha-Satz -> "
+        "Alltagsrelevanz, siehe Design-System Abschnitt 1), den Fazit-Text fuer "
+        "Slide 9 sowie die Caption. "
         "Reiche alles ueber das Werkzeug 'slide_texte' ein."
     )
     resp = _client().messages.create(
