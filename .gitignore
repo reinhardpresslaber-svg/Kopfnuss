@@ -1,0 +1,17 @@
+# Geheimnisse (API-Keys) - nie ins Repo
+.env
+
+# Lokale Claude-Code-Einstellungen (keine Projektdatei)
+.claude/
+
+# Python-Umgebung (wird automatisch erzeugt, nicht versionieren)
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# Fertige Bilder & generierte Export-Dateien - liegen in OneDrive, nicht in Git
+Posts/
+slides_export_*/
+carousel_*.html
