@@ -83,6 +83,7 @@ def _system_prompt():
 COVER_TOOL = {
     "name": "cover_vorschlaege",
     "description": "Reicht genau 3 Formulierungsvorschlaege fuer die Cover-Frage (Slide 1) ein.",
+    "strict": True,
     "input_schema": {
         "type": "object",
         "properties": {
@@ -94,12 +95,14 @@ COVER_TOOL = {
             }
         },
         "required": ["vorschlaege"],
+        "additionalProperties": False,
     },
 }
 
 SLIDES_TOOL = {
     "name": "slide_texte",
     "description": "Reicht die Slide-Texte 2-8, den Fazit-Text (Slide 9) und die Caption ein.",
+    "strict": True,
     "input_schema": {
         "type": "object",
         "properties": {
@@ -112,14 +115,15 @@ SLIDES_TOOL = {
                     "properties": {
                         "label": {
                             "type": "string",
-                            "description": "Kurzes Eyebrow-Label, z.B. 'Beispiel' - leer lassen wenn kein Label passt",
+                            "description": "Kurzes Eyebrow-Label, z.B. 'Beispiel' - leerer String wenn kein Label passt",
                         },
                         "body": {
                             "type": "string",
                             "description": "HTML-Body der Slide nach den vorgegebenen Bausteinen",
                         },
                     },
-                    "required": ["body"],
+                    "required": ["label", "body"],
+                    "additionalProperties": False,
                 },
             },
             "fazit_body": {
@@ -136,6 +140,7 @@ SLIDES_TOOL = {
             },
         },
         "required": ["slides_2_bis_8", "fazit_body", "caption"],
+        "additionalProperties": False,
     },
 }
 
