@@ -76,11 +76,20 @@ BLOBS = [
 BGS = ["bg", "bg-alt", "bg", "bg-alt", "bg", "bg-alt", "bg", "bg-alt", "bg"]
 
 
-def build_cover_slide(cover_frage):
-    """Baut Slide 1 (Cover): Logo + Cover-Frage. Layout ist fest, nur der Fragetext variiert."""
+def build_cover_slide(cover_frage, bild_b64=None):
+    """Baut Slide 1 (Cover): Logo + Cover-Frage, optional mit generiertem
+    Motiv als zusaetzliche Bildebene (zwischen den Blobs und dem Text)."""
+    bild_layer = ""
+    if bild_b64:
+        bild_layer = (
+            f'<img src="data:image/png;base64,{bild_b64}" alt="" '
+            f'style="position:absolute; top:-90px; left:-84px; width:1080px; height:1350px; '
+            f'object-fit:contain; opacity:0.4; z-index:1; pointer-events:none;"/>'
+        )
     return {
         "eyebrow": "01 / 09",
         "body": f'''
+        {bild_layer}
         <div class="content-mid" style="align-items:flex-start;">
           <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo"/>
           <div class="headline" style="font-size:56px; margin-top:30px;">{cover_frage}</div>

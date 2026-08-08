@@ -4,3 +4,5 @@ python-dotenv==1.2.2
 requests==2.34.2
 streamlit==1.61.1
 playwright==1.62.0
+numpy==2.5.1
+pillow==12.3.0

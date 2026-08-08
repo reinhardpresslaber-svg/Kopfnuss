@@ -5,10 +5,9 @@ Verbindet die bereits fertigen Module zu einem klickbaren Ablauf:
 Thema eingeben -> Cover-Frage waehlen -> Slides & Caption generieren
 -> Vorschau ansehen.
 
-Noch NICHT eingebaut: Bild-Modul (eigenes Cover-Bild statt reinem Text)
-- kommt in einem spaeteren Schritt.
 """
 
+import base64
 import io
 import os
 import re
@@ -20,6 +19,7 @@ from post_historie import check_topic, append_post
 from research_module import research_thema
 from text_module import generate_cover_optionen, generate_slides_und_caption, assemble_slides
 from render_module import render_carousel, export_pngs
+from image_module import generate_cover_bild
 
 st.set_page_config(page_title="Kopfnuss Post-Generator", page_icon="🥜", layout="centered")
 st.title("🥜 Kopfnuss Post-Generator")
@@ -46,6 +46,7 @@ for key, default in [
     ("slides_ergebnis", None),
     ("render_ergebnis", None),
     ("png_paths", None),
+    ("cover_bild_bytes", None),
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -82,6 +83,7 @@ if st.button("Cover-Vorschlaege generieren", disabled=not thema):
         st.session_state.cover_optionen = generate_cover_optionen(thema, kontext=kontext)
     st.session_state.slides_ergebnis = None
     st.session_state.render_ergebnis = None
+    st.session_state.cover_bild_bytes = None
 
 if st.session_state.cover_optionen:
     st.header("3. Cover-Frage auswaehlen")
@@ -92,10 +94,24 @@ if st.session_state.cover_optionen:
     )
     cover_frage = st.text_input("Cover-Frage (kannst du hier noch anpassen):", value=auswahl)
 
+    st.header("4. Cover-Bild")
+    bild_button_label = "Neu generieren" if st.session_state.cover_bild_bytes else "Cover-Bild generieren"
+    if st.button(bild_button_label):
+        with st.spinner("Gemini erzeugt ein passendes Motiv..."):
+            st.session_state.cover_bild_bytes = generate_cover_bild(cover_frage)
+
+    if st.session_state.cover_bild_bytes:
+        st.image(st.session_state.cover_bild_bytes, caption="Wird transparent hinter Logo/Ueberschrift gelegt", width=300)
+
     if st.button("Slides & Caption generieren"):
         with st.spinner("Claude schreibt die Slides 2-8, das Fazit und die Caption..."):
             ergebnis = generate_slides_und_caption(thema, cover_frage, kontext=kontext)
-            slides = assemble_slides(cover_frage, ergebnis["slides_2_bis_8"], ergebnis["fazit_body"])
+            bild_b64 = (
+                base64.b64encode(st.session_state.cover_bild_bytes).decode("ascii")
+                if st.session_state.cover_bild_bytes
+                else None
+            )
+            slides = assemble_slides(cover_frage, ergebnis["slides_2_bis_8"], ergebnis["fazit_body"], bild_b64=bild_b64)
             slug = slugify(thema)
             render_ergebnis = render_carousel(
                 slides=slides,
@@ -110,12 +126,12 @@ if st.session_state.cover_optionen:
         st.session_state.png_paths = None
 
 if st.session_state.render_ergebnis:
-    st.header("4. Vorschau")
+    st.header("5. Vorschau")
     with open(st.session_state.render_ergebnis["preview_html"], encoding="utf-8") as f:
         html = f.read()
     st.components.v1.html(html, height=800, scrolling=True)
 
-    st.header("5. PNGs erzeugen")
+    st.header("6. PNGs erzeugen")
     if st.button("9 PNGs erzeugen"):
         with st.spinner("Erzeuge Screenshots der 9 Slides..."):
             st.session_state.png_paths = export_pngs(st.session_state.render_ergebnis["slide_htmls"])
@@ -135,7 +151,7 @@ if st.session_state.render_ergebnis:
             mime="application/zip",
         )
 
-    st.header("6. Caption")
+    st.header("7. Caption")
     st.text_area("Caption (zum Kopieren)", st.session_state.slides_ergebnis["caption"], height=200)
 
     if st.button("Als fertigen Post in der Historie speichern"):

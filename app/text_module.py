@@ -207,9 +207,9 @@ def generate_slides_und_caption(thema, cover_frage, kontext=""):
     return _tool_input(resp)
 
 
-def assemble_slides(cover_frage, slides_2_bis_8, fazit_body):
+def assemble_slides(cover_frage, slides_2_bis_8, fazit_body, bild_b64=None):
     """Baut die vollstaendige 9er-Slide-Liste fuer render_carousel() zusammen."""
-    slides = [build_cover_slide(cover_frage)]
+    slides = [build_cover_slide(cover_frage, bild_b64=bild_b64)]
     for i, s in enumerate(slides_2_bis_8, start=2):
         eyebrow = f"{i:02d} / 09"
         if s.get("label"):
