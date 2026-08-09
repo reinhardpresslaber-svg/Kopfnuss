@@ -15,7 +15,14 @@ import re
 import anthropic
 from dotenv import load_dotenv
 
-from render_module import build_cover_slide, build_cta_slide
+from render_module import (
+    build_cover_slide,
+    build_cta_slide,
+    parse_slide_body,
+    build_slide_body,
+    parse_fazit_body,
+    build_fazit_body,
+)
 
 load_dotenv()
 
@@ -253,7 +260,7 @@ Liste/Aufzaehlung:
 """
 
 
-def _video_system_prompt():
+def _editorial_system_prompt():
     return (
         "Du bist die Text-Redaktion fuer den Instagram-Kanal @KopfnussPsychologie "
         "(Betreiber: Diplom-Psychologe). Halte dich an Ton, Sprache und Themenwahl "
@@ -275,11 +282,139 @@ def generate_gemini_video_prompt(thema, cover_frage, caption, kontext=""):
     resp = _client().messages.create(
         model=MODEL,
         max_tokens=800,
-        system=_video_system_prompt(),
+        system=_editorial_system_prompt(),
         messages=[{"role": "user", "content": user_msg}],
     )
     text_block = next(b for b in resp.content if b.type == "text")
     return _clean(text_block.text).strip()
+
+
+PROOFREAD_TOOL = {
+    "name": "korrekturen",
+    "description": (
+        "Reicht fuer jedes eingereichte Textfeld die korrigierte Fassung ein "
+        "- IMMER fuer jede ID einen Eintrag zurueckgeben, auch wenn der Text "
+        "unveraendert bleibt."
+    ),
+    "strict": True,
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "korrekturen": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string", "description": "Identische ID wie im Eingabetext"},
+                        "text": {
+                            "type": "string",
+                            "description": (
+                                "Korrigierter Text - nur kaputte/fehlende Umlaute, "
+                                "Grammatikfehler und fehlende Woerter beheben, "
+                                "inhaltlich und im Ton unveraendert lassen."
+                            ),
+                        },
+                    },
+                    "required": ["id", "text"],
+                    "additionalProperties": False,
+                },
+            }
+        },
+        "required": ["korrekturen"],
+        "additionalProperties": False,
+    },
+}
+
+
+def _sammle_proofreading_items(slides_ergebnis, caption):
+    """
+    Zerlegt alle bearbeitbaren Text-Bausteine (Slide-Headlines/Bodies bzw.
+    Trio-Items, Fazit, Caption) in eine flache Liste von (id, text) fuer eine
+    gemeinsame Proofreading-Runde. Nutzt dieselbe parse_slide_body()-Logik
+    wie die manuelle Text-Bearbeitung, damit HTML sicher rund-trippt.
+    Slides mit unbekannter Struktur (type "raw") werden ausgelassen, da sich
+    ihr HTML nicht sicher rekonstruieren laesst.
+    """
+    items = []
+    parsed_slides = []
+    for i, s in enumerate(slides_ergebnis["slides_2_bis_8"], start=2):
+        parsed = parse_slide_body(s["body"])
+        parsed_slides.append(parsed)
+        if parsed["type"] == "trio":
+            items.append((f"s{i}_headline", parsed["headline"]))
+            for j, item in enumerate(parsed["items"]):
+                items.append((f"s{i}_item{j}_titel", item["titel"]))
+                items.append((f"s{i}_item{j}_text", item["text"]))
+        elif parsed["type"] in ("card", "simple"):
+            items.append((f"s{i}_headline", parsed["headline"]))
+            items.append((f"s{i}_body", parsed["body"]))
+    fazit_text = parse_fazit_body(slides_ergebnis["fazit_body"])
+    items.append(("fazit", fazit_text))
+    items.append(("caption", caption))
+    return items, parsed_slides
+
+
+def proofread_slides_und_caption(slides_ergebnis, caption):
+    """
+    Laesst Claude alle Texte (Slide-Headlines/Bodies, Fazit, Caption) auf
+    kaputte Umlaute, Grammatikfehler und fehlende Woerter pruefen und
+    korrigieren - Inhalt/Ton bleiben unveraendert, nur Fehler werden
+    behoben. Gibt ein korrigiertes slides_ergebnis-Dict (gleiche Form wie
+    generate_slides_und_caption()) zurueck.
+    """
+    items, parsed_slides = _sammle_proofreading_items(slides_ergebnis, caption)
+
+    eingabe = "\n\n".join(f'ID: {id_}\nText: "{text}"' for id_, text in items)
+    user_msg = (
+        "Pruefe folgende Textfelder eines fertigen Instagram-Posts auf drei "
+        "Fehlerarten: (1) als ae/oe/ue/ss ausgeschriebene statt echter "
+        "Umlaute/scharfes-S - ersetze IMMER durch das richtige Zeichen, "
+        "z.B. 'Woerter' -> 'Wörter', 'Koerper' -> 'Körper', "
+        "'Verhaeltnis' -> 'Verhältnis', 'duenner' -> 'dünner', "
+        "'gepraegt' -> 'geprägt', 'Abkuerzungen' -> 'Abkürzungen', "
+        "'ausser' -> 'außer' - auch wenn der Rest des Wortes korrekt "
+        "erscheint; (2) Grammatikfehler; (3) fehlende Woerter oder "
+        "abgebrochene Saetze. Aendere NICHTS am Inhalt, Ton oder an der "
+        "Wortwahl - nur diese drei Fehlerarten beheben. Felder ohne Fehler "
+        "unveraendert zurueckgeben. Reiche fuer JEDE ID einen Eintrag "
+        "ein.\n\n" + eingabe
+    )
+    resp = _client().messages.create(
+        model=MODEL,
+        max_tokens=4096,
+        system=_editorial_system_prompt(),
+        tools=[PROOFREAD_TOOL],
+        tool_choice={"type": "tool", "name": "korrekturen"},
+        messages=[{"role": "user", "content": user_msg}],
+    )
+    korrekturen = {k["id"]: k["text"] for k in _tool_input(resp)["korrekturen"]}
+
+    korrigierte_slides = []
+    for i, (s, parsed) in enumerate(zip(slides_ergebnis["slides_2_bis_8"], parsed_slides), start=2):
+        if parsed["type"] == "trio":
+            parsed["headline"] = korrekturen.get(f"s{i}_headline", parsed["headline"])
+            for j, item in enumerate(parsed["items"]):
+                item["titel"] = korrekturen.get(f"s{i}_item{j}_titel", item["titel"])
+                item["text"] = korrekturen.get(f"s{i}_item{j}_text", item["text"])
+            neuer_body = build_slide_body(parsed)
+        elif parsed["type"] in ("card", "simple"):
+            parsed["headline"] = korrekturen.get(f"s{i}_headline", parsed["headline"])
+            parsed["body"] = korrekturen.get(f"s{i}_body", parsed["body"])
+            neuer_body = build_slide_body(parsed)
+        else:
+            neuer_body = s["body"]
+        korrigierte_slides.append({"label": s["label"], "body": neuer_body})
+
+    korrigiertes_fazit = build_fazit_body(
+        korrekturen.get("fazit", parse_fazit_body(slides_ergebnis["fazit_body"]))
+    )
+    korrigierte_caption = korrekturen.get("caption", caption)
+
+    return {
+        "slides_2_bis_8": korrigierte_slides,
+        "fazit_body": korrigiertes_fazit,
+        "caption": korrigierte_caption,
+    }
 
 
 def assemble_slides(cover_frage, slides_2_bis_8, fazit_body, bild_b64=None):

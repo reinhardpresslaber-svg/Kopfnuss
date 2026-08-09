@@ -23,6 +23,7 @@ from text_module import (
     generate_cover_optionen,
     generate_slides_und_caption,
     generate_gemini_video_prompt,
+    proofread_slides_und_caption,
     assemble_slides,
 )
 from render_module import (
@@ -172,7 +173,10 @@ if st.session_state.cover_optionen:
 
     if st.button("Slides & Caption generieren"):
         with st.spinner("Claude schreibt die Slides 2-8, das Fazit und die Caption..."):
-            st.session_state.slides_ergebnis = generate_slides_und_caption(thema, cover_frage, kontext=kontext)
+            ergebnis = generate_slides_und_caption(thema, cover_frage, kontext=kontext)
+        with st.spinner("Claude prueft Umlaute, Grammatik und fehlende Woerter..."):
+            korrigiert = proofread_slides_und_caption(ergebnis, ergebnis["caption"])
+        st.session_state.slides_ergebnis = korrigiert
         st.session_state.cover_frage = cover_frage
         st.session_state.render_ergebnis = None
         st.session_state.png_paths = None
