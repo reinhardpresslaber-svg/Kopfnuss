@@ -232,8 +232,10 @@ if st.session_state.render_ergebnis:
 
     st.header("8. Caption")
     st.text_area(
-        "Caption (zum Kopieren)", st.session_state.slides_ergebnis["caption"], height=200, key="caption_edit"
+        "Caption (zum Bearbeiten)", st.session_state.slides_ergebnis["caption"], height=200, key="caption_edit"
     )
+    st.caption("Zum Kopieren: Maus ueber das Feld unten halten (bzw. am Handy antippen) und auf das Kopier-Symbol oben rechts tippen.")
+    st.code(st.session_state["caption_edit"], language=None)
 
     if st.button("Als fertigen Post in der Historie speichern"):
         r = st.session_state.recherche
