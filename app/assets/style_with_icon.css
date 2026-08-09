@@ -212,7 +212,7 @@
     font-weight:700;
     font-size: 30px;
     color: var(--ink);
-    margin-top: 20px;
+    margin-top: 14px;
     z-index:2;
   }
   .cta-line svg{

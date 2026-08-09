@@ -63,6 +63,17 @@ REPOST_ICON_SVG = (
     '</svg>'
 )
 
+FOLLOW_ICON_SVG = (
+    '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" '
+    'stroke="currentColor" stroke-width="2.4" stroke-linecap="round" '
+    'stroke-linejoin="round" style="flex-shrink:0; vertical-align:-6px;">'
+    '<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>'
+    '<circle cx="8.5" cy="7" r="4"/>'
+    '<line x1="20" y1="8" x2="20" y2="14"/>'
+    '<line x1="23" y1="11" x2="17" y2="11"/>'
+    '</svg>'
+)
+
 # Farbe fest auf --ink gesetzt (statt currentColor), damit das Herz
 # garantiert dunkel/schwarz bleibt statt in Emoji-Rot zu erscheinen.
 HEART_ICON_SVG = (
@@ -120,10 +131,10 @@ def build_cta_slide(fazit_html):
           <div class="headline">Fazit</div>
           {fazit_html}
           <p class="cta-line">{BOOKMARK_ICON_SVG} Speichern</p>
-          <p class="cta-line" style="margin-top:20px;">{SHARE_ICON_SVG} Interessant? Danke f&uuml;rs Teilen {HEART_ICON_SVG}</p>
-          <p class="cta-line" style="margin-top:20px;">{REPOST_ICON_SVG} Interessant? Danke f&uuml;rs Reposten {HEART_ICON_SVG}</p>
-          <p class="cta-line" style="margin-top:20px;">&#128073; Folge @KopfnussPsychologie</p>
-          <p class="cta-line" style="margin-top:4px;">Wissenswertes aus Psychologie &amp; Coaching</p>
+          <p class="cta-line" style="margin-top:14px;">{SHARE_ICON_SVG} Interessant? Danke f&uuml;rs Teilen {HEART_ICON_SVG}</p>
+          <p class="cta-line" style="margin-top:14px;">{REPOST_ICON_SVG} Interessant? Danke f&uuml;rs Reposten {HEART_ICON_SVG}</p>
+          <p class="cta-line" style="margin-top:14px;">{FOLLOW_ICON_SVG} Folge @KopfnussPsychologie</p>
+          <p class="cta-line" style="margin-top:2px;">Wissenswertes aus Psychologie &amp; Coaching</p>
         </div>
         ''',
         "footer": "@KopfnussPsychologie",
