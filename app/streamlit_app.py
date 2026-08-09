@@ -205,7 +205,7 @@ if st.session_state.render_ergebnis:
             st.session_state.png_paths = export_pngs(st.session_state.render_ergebnis["slide_htmls"])
 
     if st.session_state.png_paths:
-        st.success(f"{len(st.session_state.png_paths)} PNGs erzeugt.")
+        st.success(f"{len(st.session_state.png_paths)} PNGs erzeugt (jeweils 1080x1350px).")
         st.image(st.session_state.png_paths, width=150)
 
         aktuelle_caption = st.session_state.get("caption_edit", st.session_state.slides_ergebnis["caption"])
@@ -220,6 +220,15 @@ if st.session_state.render_ergebnis:
             file_name=f"kopfnuss_{slugify(thema)}.zip",
             mime="application/zip",
         )
+
+        with st.expander("Direkt aufs iPhone speichern (ohne ZIP)"):
+            st.caption(
+                "Auf dem iPhone: Bild antippen und gedrueckt halten, dann "
+                "'Zu Fotos hinzufuegen' waehlen - jedes Bild kommt in voller "
+                "Aufloesung (1080x1350px) in deine Fotomediathek."
+            )
+            for i, png_path in enumerate(st.session_state.png_paths, start=1):
+                st.image(png_path, caption=f"Slide {i}/9", use_container_width=True)
 
     st.header("8. Caption")
     st.text_area(
