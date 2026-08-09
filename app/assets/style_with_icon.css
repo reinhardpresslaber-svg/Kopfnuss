@@ -219,33 +219,17 @@
     flex-shrink:0;
     vertical-align:-6px;
   }
-  /* Teilen/Repost-Zeile auf Slide 9: Icon + Label als flex-Paare,
-     nebeneinander mit Abstand. Nutzt SHARE_ICON_SVG / REPOST_ICON_SVG
-     aus build_carousel.py.
-     Hinweis: wkhtmltoimage (altes WebKit) unterstuetzt kein flexbox "gap" -
-     Abstaende daher ueber margin, nicht gap, sonst kleben Icon/Text/Items
-     beim Export aneinander (im Browser waere gap unsichtbar korrekt). */
-  .cta-row{
-    display:flex;
-    align-items:center;
-    margin-top: 20px;
-    z-index:2;
-  }
-  .cta-row .cta-item{
-    display:flex;
-    align-items:center;
+  /* Kurze "Danke"-Unterzeile unter Teilen/Repost auf Slide 9 - bewusst
+     kleiner/leiser als .cta-line, damit die fette Icon-Zeile fuehrend
+     bleibt und die Dankeszeile als Nebengedanke wirkt. */
+  .cta-sub{
     font-family:'Karla', sans-serif;
-    font-weight:700;
-    font-size: 30px;
-    color: var(--ink);
-    margin-right: 44px;
-  }
-  .cta-row .cta-item:last-child{
-    margin-right: 0;
-  }
-  .cta-row .cta-item svg{
-    margin-right: 12px;
-    flex-shrink:0;
+    font-weight:400;
+    font-size: 24px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    margin-bottom: 0;
+    z-index:2;
   }
 
   /* Controls */

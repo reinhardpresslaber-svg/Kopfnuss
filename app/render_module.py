@@ -63,6 +63,17 @@ REPOST_ICON_SVG = (
     '</svg>'
 )
 
+# Farbe fest auf --ink (statt currentColor) gesetzt, damit das Herz immer
+# dunkel/schwarz bleibt, auch wenn der umgebende Text (.cta-sub) in einem
+# helleren Grauton steht.
+HEART_ICON_SVG = (
+    '<svg width="20" height="20" viewBox="0 0 24 24" fill="#2C2420" '
+    'style="flex-shrink:0; vertical-align:-3px; margin-left:4px;">'
+    '<path d="M12 21s-7.44-4.35-10-9.03C0.28 8.62 1.7 5 5.4 5c2.1 0 3.6 1.2 4.6 2.73'
+    'C11 6.2 12.5 5 14.6 5c3.7 0 5.12 3.62 3.4 6.97C19.44 16.65 12 21 12 21z"/>'
+    '</svg>'
+)
+
 # Vordefinierte, alternierende Hintergrund-"Blobs" fuer die 9 Slides.
 BLOBS = [
     '<div class="blob" style="width:640px;height:640px;background:var(--rust);top:-180px;right:-200px;"></div><div class="blob" style="width:420px;height:420px;background:var(--gold);bottom:-140px;left:-140px;"></div>',
@@ -110,11 +121,12 @@ def build_cta_slide(fazit_html):
           <div class="headline">Fazit</div>
           {fazit_html}
           <p class="cta-line">{BOOKMARK_ICON_SVG} Speichern</p>
-          <div class="cta-row">
-            <span class="cta-item">{SHARE_ICON_SVG} Teilen</span>
-            <span class="cta-item">{REPOST_ICON_SVG} Repost</span>
-          </div>
-          <p class="cta-line" style="margin-top:6px;">&#128073; Folge @KopfnussPsychologie | Wissenswertes aus Psychologie &amp; Coaching</p>
+          <p class="cta-line" style="margin-top:20px;">{SHARE_ICON_SVG} Teilen</p>
+          <p class="cta-sub">Interessant? Danke f&uuml;rs Teilen {HEART_ICON_SVG}</p>
+          <p class="cta-line" style="margin-top:20px;">{REPOST_ICON_SVG} Repost</p>
+          <p class="cta-sub">Interessant? Danke f&uuml;rs Reposten {HEART_ICON_SVG}</p>
+          <p class="cta-line" style="margin-top:20px;">&#128073; Folge @KopfnussPsychologie</p>
+          <p class="cta-line" style="margin-top:4px;">Wissenswertes aus Psychologie &amp; Coaching</p>
         </div>
         ''',
         "footer": "@KopfnussPsychologie",
