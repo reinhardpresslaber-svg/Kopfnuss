@@ -12,6 +12,7 @@ import html as html_lib
 import io
 import os
 import re
+import shutil
 import zipfile
 
 import streamlit as st
@@ -37,6 +38,8 @@ from image_module import generate_cover_bild
 
 st.set_page_config(page_title="Kopfnuss Post-Generator", page_icon="🥜", layout="centered")
 st.title("🥜 Kopfnuss Post-Generator")
+
+POSTS_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Posts")
 
 
 def slugify(text):
@@ -318,7 +321,9 @@ if st.session_state.render_ergebnis:
             box_height=200,
         )
 
-    if st.button("Als fertigen Post in der Historie speichern"):
+    if not st.session_state.png_paths:
+        st.caption("Erst die 9 PNGs erzeugen (Schritt 7), dann laesst sich der Post speichern.")
+    if st.button("Als fertigen Post in der Historie speichern", disabled=not st.session_state.png_paths):
         r = st.session_state.recherche
         quelle = f"{r['autoren']} ({r['jahr']})" if r else None
         append_post(
@@ -328,4 +333,17 @@ if st.session_state.render_ergebnis:
             quelle=quelle,
             farbthema=farbthema,
         )
-        st.success("Gespeichert in post_historie.json")
+
+        post_dir = os.path.join(POSTS_ROOT, slugify(thema))
+        os.makedirs(post_dir, exist_ok=True)
+        for png_path in st.session_state.png_paths:
+            shutil.copy2(png_path, os.path.join(post_dir, os.path.basename(png_path)))
+        aktuelle_caption = st.session_state.get("caption_edit", st.session_state.slides_ergebnis["caption"])
+        with open(os.path.join(post_dir, "caption.txt"), "w", encoding="utf-8") as f:
+            f.write(aktuelle_caption)
+        if st.session_state.video_prompt:
+            aktueller_video_prompt = st.session_state.get("video_prompt_edit", st.session_state.video_prompt)
+            with open(os.path.join(post_dir, "video_prompt.txt"), "w", encoding="utf-8") as f:
+                f.write(aktueller_video_prompt)
+
+        st.success(f"Gespeichert in post_historie.json und in {post_dir}")
