@@ -130,7 +130,7 @@ def build_cta_slide(fazit_html):
         <div class="content-mid">
           <div class="headline">Fazit</div>
           {fazit_html}
-          <p class="cta-line">{BOOKMARK_ICON_SVG} Speichern</p>
+          <p class="cta-line" style="margin-top:45px;">{BOOKMARK_ICON_SVG} Speichern</p>
           <p class="cta-line" style="margin-top:14px;">{SHARE_ICON_SVG} Interessant? Danke f&uuml;rs Teilen {HEART_ICON_SVG}</p>
           <p class="cta-line" style="margin-top:14px;">{REPOST_ICON_SVG} Interessant? Danke f&uuml;rs Reposten {HEART_ICON_SVG}</p>
           <p class="cta-line" style="margin-top:14px;">{FOLLOW_ICON_SVG} Folge @KopfnussPsychologie</p>
