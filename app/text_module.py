@@ -53,11 +53,21 @@ als aeusserster Container pro Slide.
     <div class="item"><h4>Titel 3</h4><p>Text 3</p></div>
   </div>
 </div>
+Wichtig bei diesem Baustein: Text 1, Text 2 und Text 3 muessen etwa
+gleich lang sein (max. ca. 12 Woerter, ein kurzer Satz) - die drei
+Kaestchen werden nebeneinander gerendert, bei stark unterschiedlicher
+Laenge entstehen haessliche leere Flaechen in den kuerzeren Kaestchen.
 
 Sonderzeichen NUR in den Slide-"body"-Feldern (nicht in der Caption!) als
 HTML-Entities schreiben (&uuml; &auml; &ouml; &szlig; &ndash; &mdash; &bdquo;
 &ldquo; &rsquo;), das macht das PNG-Rendering zuverlaessiger - siehe
 bestehende Posts als Vorbild.
+
+Verwende in den Text-Feldern (Headline, Fliesstext, Titel/Text der
+Bausteine) AUSSCHLIESSLICH reinen Text, KEINE zusaetzlichen Inline-Tags
+wie <em>, <strong>, <b> oder <i> - diese werden von der App nicht
+unterstuetzt und wuerden im fertigen Bild als sichtbarer Text
+("<em>...</em>") statt als Formatierung erscheinen.
 """
 
 

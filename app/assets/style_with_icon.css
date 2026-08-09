@@ -153,6 +153,7 @@
   }
   .trio{
     display:flex;
+    align-items: flex-start;
     gap: 28px;
     margin-top: 36px;
     z-index:2;

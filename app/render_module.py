@@ -369,6 +369,20 @@ def export_pngs(slide_html_paths):
     return png_paths
 
 
+_INLINE_TAG_RE = re.compile(r"</?(?:em|strong|b|i)>", re.IGNORECASE)
+
+
+def _strip_inline_tags(text):
+    """
+    Entfernt vereinzelte Formatierungs-Tags (<em>, <strong>, <b>, <i>), die
+    Claude gelegentlich trotz Prompt-Anweisung in den Text mischt. Die
+    Text-Bearbeitung ist als reines Plaintext-Feld gedacht - ohne diesen
+    Schritt wuerden solche Tags beim naechsten Rendern als sichtbarer Text
+    ("<em>...</em>") statt als Formatierung erscheinen.
+    """
+    return _INLINE_TAG_RE.sub("", text)
+
+
 _TRIO_ITEM_RE = re.compile(r'<div class="item"><h4>(.*?)</h4><p>(.*?)</p></div>', re.DOTALL)
 _HEADLINE_RE = re.compile(r'<div class="headline"[^>]*>(?P<headline>.*?)</div>', re.DOTALL)
 _CARD_RE = re.compile(
@@ -397,9 +411,12 @@ def parse_slide_body(body_html):
         if len(items) == 3 and headline_m:
             return {
                 "type": "trio",
-                "headline": html_module.unescape(headline_m.group("headline")).strip(),
+                "headline": _strip_inline_tags(html_module.unescape(headline_m.group("headline")).strip()),
                 "items": [
-                    {"titel": html_module.unescape(t).strip(), "text": html_module.unescape(p).strip()}
+                    {
+                        "titel": _strip_inline_tags(html_module.unescape(t).strip()),
+                        "text": _strip_inline_tags(html_module.unescape(p).strip()),
+                    }
                     for t, p in items
                 ],
             }
@@ -408,15 +425,15 @@ def parse_slide_body(body_html):
         if m:
             return {
                 "type": "card",
-                "headline": html_module.unescape(m.group("headline")).strip(),
-                "body": html_module.unescape(m.group("body")).strip(),
+                "headline": _strip_inline_tags(html_module.unescape(m.group("headline")).strip()),
+                "body": _strip_inline_tags(html_module.unescape(m.group("body")).strip()),
             }
     m = _SIMPLE_RE.search(body_html)
     if m:
         return {
             "type": "simple",
-            "headline": html_module.unescape(m.group("headline")).strip(),
-            "body": html_module.unescape(m.group("body")).strip(),
+            "headline": _strip_inline_tags(html_module.unescape(m.group("headline")).strip()),
+            "body": _strip_inline_tags(html_module.unescape(m.group("body")).strip()),
         }
     return {"type": "raw", "html": body_html}
 
@@ -462,7 +479,7 @@ def parse_fazit_body(fazit_html):
     """Extrahiert den reinen Text aus dem Fazit-Paragraph (Slide 9)."""
     m = _FAZIT_RE.search(fazit_html)
     if m:
-        return html_module.unescape(m.group("body")).strip()
+        return _strip_inline_tags(html_module.unescape(m.group("body")).strip())
     return fazit_html
 
 
