@@ -217,6 +217,58 @@ def generate_slides_und_caption(thema, cover_frage, kontext=""):
     return _tool_input(resp)
 
 
+CAPCUT_ANWEISUNG = """
+Erstelle ein Drehbuch fuer ein kurzes 10-Sekunden-Video zu diesem Post,
+gedacht zum Einfuegen in CapCuts "Text to Video"-Feature. Format:
+
+- Mehrere Szenen mit Zeitangaben in Sekunden, die zusammen genau 10
+  Sekunden ergeben (z.B. "0-2s: ...", "2-4,5s: ...", "4,5-7s: ...", ...).
+- Jede Szene bekommt einen kurzen On-Screen-Text (max. 5-7 Woerter - muss
+  in der jeweiligen Zeit gut lesbar sein).
+- Spannungsbogen wie beim Post: Hook (passend zur Cover-Frage) -> ein
+  Kerngedanke aus dem Post -> kurzer Payoff/Aha-Moment.
+- Letzte Szene: kurzer CTA, z.B. "Folge @KopfnussPsychologie fuer mehr".
+- Danach, getrennt durch eine Leerzeile, 2-3 Zeilen "Design-Hinweise
+  fuer CapCut": welche Kopfnuss-Farben (Terrakotta #C15A2E, Salbeigruen
+  #8FBFA0, Dunkelgruen #2E4A3B, Gold #EDA23E, Creme-Hintergrund #FBF6EF)
+  und welche Schriftstimmung (kraeftige Serifen-Headlines, klare
+  serifenlose Fliesstext-Schrift) fuer Untertitel/Vorlage in CapCut
+  gewaehlt werden sollten, damit das Video zum Post passt.
+- Antworte NUR mit diesem Text (keine Ueberschrift wie "Drehbuch:",
+  keine Einleitung), direkt mit der ersten Szene beginnen - der Text
+  wird 1:1 kopiert.
+"""
+
+
+def _capcut_system_prompt():
+    return (
+        "Du bist die Text-Redaktion fuer den Instagram-Kanal @KopfnussPsychologie "
+        "(Betreiber: Diplom-Psychologe). Halte dich an Ton, Sprache und Themenwahl "
+        "aus folgendem Design-System:\n\n" + _load_design_system()
+    )
+
+
+def generate_capcut_drehbuch(thema, cover_frage, caption, kontext=""):
+    """Generiert ein 10-Sekunden-Kurzvideo-Drehbuch (Szenen mit Zeitangaben +
+    kurze Design-Hinweise) fuer CapCuts 'Text to Video'-Feature, passend zum
+    fertigen Post (Cover-Frage + Caption als inhaltliche Grundlage)."""
+    user_msg = (
+        f"Thema: {thema}\n"
+        f"Cover-Frage (Slide 1): {cover_frage}\n"
+        f"Caption des fertigen Posts:\n{caption}\n\n"
+        + (f"Rechercheergebnisse/Kontext:\n{kontext}\n\n" if kontext else "")
+        + CAPCUT_ANWEISUNG
+    )
+    resp = _client().messages.create(
+        model=MODEL,
+        max_tokens=700,
+        system=_capcut_system_prompt(),
+        messages=[{"role": "user", "content": user_msg}],
+    )
+    text_block = next(b for b in resp.content if b.type == "text")
+    return _clean(text_block.text).strip()
+
+
 def assemble_slides(cover_frage, slides_2_bis_8, fazit_body, bild_b64=None):
     """Baut die vollstaendige 9er-Slide-Liste fuer render_carousel() zusammen."""
     slides = [build_cover_slide(cover_frage, bild_b64=bild_b64)]

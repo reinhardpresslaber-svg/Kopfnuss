@@ -18,7 +18,12 @@ import streamlit as st
 
 from post_historie import check_topic, append_post
 from research_module import research_thema
-from text_module import generate_cover_optionen, generate_slides_und_caption, assemble_slides
+from text_module import (
+    generate_cover_optionen,
+    generate_slides_und_caption,
+    generate_capcut_drehbuch,
+    assemble_slides,
+)
 from render_module import (
     render_carousel,
     export_pngs,
@@ -48,6 +53,53 @@ def recherche_als_kontext(r):
     )
 
 
+def copy_button_widget(text, label="Text kopieren", height=230, box_height=160):
+    """
+    Zeigt ein Textfeld mit einem 'Kopieren'-Button, der auch auf dem iPhone
+    funktioniert. Nutzt document.execCommand('copy') statt der modernen
+    Async-Clipboard-API, weil Safari Letztere nur ueber https/localhost
+    erlaubt (die App wird oft ueber die Netzwerk-IP per http aufgerufen).
+    """
+    text_escaped = html_lib.escape(text)
+    component_html = f"""
+    <div style="font-family:'Source Sans Pro', sans-serif;">
+      <textarea id="capbox" readonly style="width:100%; box-sizing:border-box; height:{box_height}px;
+        padding:8px; border-radius:6px; border:1px solid #ccc; font-family:inherit;
+        font-size:14px; resize:vertical;">{text_escaped}</textarea>
+      <button id="copybtn" style="margin-top:8px; padding:8px 16px; border-radius:6px;
+        border:none; background:#C15A2E; color:white; font-size:14px; cursor:pointer;">
+        {label}
+      </button>
+      <span id="copystatus" style="margin-left:10px; font-size:14px; color:#2E4A3B;"></span>
+    </div>
+    <script>
+      const box = document.getElementById('capbox');
+      const btn = document.getElementById('copybtn');
+      const status = document.getElementById('copystatus');
+      btn.addEventListener('click', function() {{
+        box.focus();
+        box.select();
+        box.setSelectionRange(0, box.value.length);
+        let ok = false;
+        try {{ ok = document.execCommand('copy'); }} catch (e) {{ ok = false; }}
+        if (ok) {{
+          status.textContent = 'Kopiert!';
+        }} else if (navigator.clipboard && navigator.clipboard.writeText) {{
+          navigator.clipboard.writeText(box.value).then(function() {{
+            status.textContent = 'Kopiert!';
+          }}).catch(function() {{
+            status.textContent = 'Kopieren fehlgeschlagen - bitte Text manuell markieren.';
+          }});
+        }} else {{
+          status.textContent = 'Kopieren fehlgeschlagen - bitte Text manuell markieren.';
+        }}
+        setTimeout(function() {{ status.textContent = ''; }}, 2500);
+      }});
+    </script>
+    """
+    st.components.v1.html(component_html, height=height)
+
+
 for key, default in [
     ("recherche", None),
     ("cover_optionen", None),
@@ -56,6 +108,7 @@ for key, default in [
     ("render_ergebnis", None),
     ("png_paths", None),
     ("cover_bild_bytes", None),
+    ("capcut_drehbuch", None),
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -130,6 +183,8 @@ if st.session_state.cover_optionen:
                 st.session_state.pop(f"trio_text_{i}_{j}", None)
         st.session_state.pop("fazit_body_edit", None)
         st.session_state.pop("caption_edit", None)
+        st.session_state.capcut_drehbuch = None
+        st.session_state.pop("drehbuch_edit", None)
 
     if st.session_state.slides_ergebnis:
         st.header("5. Texte bearbeiten (optional)")
@@ -239,44 +294,29 @@ if st.session_state.render_ergebnis:
         "Caption (zum Bearbeiten)", st.session_state.slides_ergebnis["caption"], height=200, key="caption_edit"
     )
     st.caption("Kopieren fuer Instagram:")
-    caption_escaped = html_lib.escape(st.session_state["caption_edit"])
-    copy_component_html = f"""
-    <div style="font-family:'Source Sans Pro', sans-serif;">
-      <textarea id="capbox" readonly style="width:100%; box-sizing:border-box; height:160px;
-        padding:8px; border-radius:6px; border:1px solid #ccc; font-family:inherit;
-        font-size:14px; resize:vertical;">{caption_escaped}</textarea>
-      <button id="copybtn" style="margin-top:8px; padding:8px 16px; border-radius:6px;
-        border:none; background:#C15A2E; color:white; font-size:14px; cursor:pointer;">
-        Caption kopieren
-      </button>
-      <span id="copystatus" style="margin-left:10px; font-size:14px; color:#2E4A3B;"></span>
-    </div>
-    <script>
-      const box = document.getElementById('capbox');
-      const btn = document.getElementById('copybtn');
-      const status = document.getElementById('copystatus');
-      btn.addEventListener('click', function() {{
-        box.focus();
-        box.select();
-        box.setSelectionRange(0, box.value.length);
-        let ok = false;
-        try {{ ok = document.execCommand('copy'); }} catch (e) {{ ok = false; }}
-        if (ok) {{
-          status.textContent = 'Kopiert!';
-        }} else if (navigator.clipboard && navigator.clipboard.writeText) {{
-          navigator.clipboard.writeText(box.value).then(function() {{
-            status.textContent = 'Kopiert!';
-          }}).catch(function() {{
-            status.textContent = 'Kopieren fehlgeschlagen - bitte Text manuell markieren.';
-          }});
-        }} else {{
-          status.textContent = 'Kopieren fehlgeschlagen - bitte Text manuell markieren.';
-        }}
-        setTimeout(function() {{ status.textContent = ''; }}, 2500);
-      }});
-    </script>
-    """
-    st.components.v1.html(copy_component_html, height=230)
+    copy_button_widget(st.session_state["caption_edit"], label="Caption kopieren")
+
+    st.header("9. Drehbuch fuer CapCut (Text-to-Video, 10 Sekunden)")
+    if st.button("Drehbuch erzeugen"):
+        with st.spinner("Claude schreibt das 10-Sekunden-Drehbuch..."):
+            st.session_state.capcut_drehbuch = generate_capcut_drehbuch(
+                thema, cover_frage, st.session_state["caption_edit"], kontext=kontext
+            )
+
+    if st.session_state.capcut_drehbuch:
+        st.text_area(
+            "Drehbuch (zum Bearbeiten)",
+            st.session_state.capcut_drehbuch,
+            height=260,
+            key="drehbuch_edit",
+        )
+        st.caption("Kopieren fuer CapCut:")
+        copy_button_widget(
+            st.session_state.get("drehbuch_edit", st.session_state.capcut_drehbuch),
+            label="Drehbuch kopieren",
+            height=310,
+            box_height=240,
+        )
 
     if st.button("Als fertigen Post in der Historie speichern"):
         r = st.session_state.recherche
