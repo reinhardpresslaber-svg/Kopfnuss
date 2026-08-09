@@ -63,9 +63,8 @@ REPOST_ICON_SVG = (
     '</svg>'
 )
 
-# Farbe fest auf --ink (statt currentColor) gesetzt, damit das Herz immer
-# dunkel/schwarz bleibt, auch wenn der umgebende Text (.cta-sub) in einem
-# helleren Grauton steht.
+# Farbe fest auf --ink gesetzt (statt currentColor), damit das Herz
+# garantiert dunkel/schwarz bleibt statt in Emoji-Rot zu erscheinen.
 HEART_ICON_SVG = (
     '<svg width="20" height="20" viewBox="0 0 24 24" fill="#2C2420" '
     'style="flex-shrink:0; vertical-align:-3px; margin-left:4px;">'
@@ -121,10 +120,8 @@ def build_cta_slide(fazit_html):
           <div class="headline">Fazit</div>
           {fazit_html}
           <p class="cta-line">{BOOKMARK_ICON_SVG} Speichern</p>
-          <p class="cta-line" style="margin-top:20px;">{SHARE_ICON_SVG} Teilen</p>
-          <p class="cta-sub">Interessant? Danke f&uuml;rs Teilen {HEART_ICON_SVG}</p>
-          <p class="cta-line" style="margin-top:20px;">{REPOST_ICON_SVG} Repost</p>
-          <p class="cta-sub">Interessant? Danke f&uuml;rs Reposten {HEART_ICON_SVG}</p>
+          <p class="cta-line" style="margin-top:20px;">{SHARE_ICON_SVG} Interessant? Danke f&uuml;rs Teilen {HEART_ICON_SVG}</p>
+          <p class="cta-line" style="margin-top:20px;">{REPOST_ICON_SVG} Interessant? Danke f&uuml;rs Reposten {HEART_ICON_SVG}</p>
           <p class="cta-line" style="margin-top:20px;">&#128073; Folge @KopfnussPsychologie</p>
           <p class="cta-line" style="margin-top:4px;">Wissenswertes aus Psychologie &amp; Coaching</p>
         </div>

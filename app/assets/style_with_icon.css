@@ -219,18 +219,6 @@
     flex-shrink:0;
     vertical-align:-6px;
   }
-  /* Kurze "Danke"-Unterzeile unter Teilen/Repost auf Slide 9 - bewusst
-     kleiner/leiser als .cta-line, damit die fette Icon-Zeile fuehrend
-     bleibt und die Dankeszeile als Nebengedanke wirkt. */
-  .cta-sub{
-    font-family:'Karla', sans-serif;
-    font-weight:400;
-    font-size: 24px;
-    color: var(--ink-soft);
-    margin-top: 6px;
-    margin-bottom: 0;
-    z-index:2;
-  }
 
   /* Controls */
   .controls{
