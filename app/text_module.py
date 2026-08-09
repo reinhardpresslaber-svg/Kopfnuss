@@ -217,21 +217,39 @@ def generate_slides_und_caption(thema, cover_frage, kontext=""):
     return _tool_input(resp)
 
 
-CAPCUT_ANWEISUNG = """
+BILDSTIL_KLAMMER = (
+    "[Bildstil: NUR 2D, flach, handgezeichnet wirkend im Stil der "
+    "1960er-Jahre (wie alte Kinderbuch-/Poster-Illustrationen) - klare "
+    "Konturen, flache Farbflaechen. KEIN 3D, KEIN Computer-Rendering, "
+    "KEIN Fotorealismus, KEIN Glanz, KEIN Farbverlauf, KEIN Schlagschatten.]"
+)
+
+CAPCUT_ANWEISUNG = f"""
 Erstelle ein Drehbuch fuer ein kurzes 10-Sekunden-Video zu diesem Post,
-gedacht zum Einfuegen in CapCuts "Text to Video"-Feature. Format:
+gedacht zum Einfuegen in CapCuts "Text to Video"-Feature.
+
+STRENGE BILDSTIL-REGEL (wortwoertlich in JEDER einzelnen Szene als
+Klammerzusatz anhaengen, nicht nur einmal am Ende - CapCut haelt sich
+sonst erfahrungsgemaess nicht daran und rendert stattdessen 3D-Grafik):
+"{BILDSTIL_KLAMMER}"
+
+Format:
 
 - Mehrere Szenen mit Zeitangaben in Sekunden, die zusammen genau 10
   Sekunden ergeben (z.B. "0-2s: ...", "2-4,5s: ...", "4,5-7s: ...", ...).
 - Jede Szene bekommt einen kurzen On-Screen-Text (max. 5-7 Woerter - muss
-  in der jeweiligen Zeit gut lesbar sein).
+  in der jeweiligen Zeit gut lesbar sein), DANACH auf derselben Zeile
+  die Bildstil-Klammer von oben, woertlich identisch wiederholt.
 - Spannungsbogen wie beim Post: Hook (passend zur Cover-Frage) -> ein
   Kerngedanke aus dem Post -> kurzer Payoff/Aha-Moment.
 - Letzte Szene: kurzer CTA, z.B. "Folge @KopfnussPsychologie fuer mehr".
 - Danach, getrennt durch eine Leerzeile, 2-3 Zeilen "Design-Hinweise
-  fuer CapCut": welche Kopfnuss-Farben (Terrakotta #C15A2E, Salbeigruen
-  #8FBFA0, Dunkelgruen #2E4A3B, Gold #EDA23E, Creme-Hintergrund #FBF6EF)
-  und welche Schriftstimmung (kraeftige Serifen-Headlines, klare
+  fuer CapCut": zuerst NOCHMAL ausdruecklich betonen, dass ausschliesslich
+  2D/handgezeichnete Flat-Illustration im 60er-Jahre-Stil gewuenscht ist
+  und 3D/Computer-Rendering/Fotorealismus in KEINEM Frame vorkommen darf,
+  danach welche Kopfnuss-Farben (Terrakotta #C15A2E, Salbeigruen #8FBFA0,
+  Dunkelgruen #2E4A3B, Gold #EDA23E, Creme-Hintergrund #FBF6EF) und
+  welche Schriftstimmung (kraeftige Serifen-Headlines, klare
   serifenlose Fliesstext-Schrift) fuer Untertitel/Vorlage in CapCut
   gewaehlt werden sollten, damit das Video zum Post passt.
 - Antworte NUR mit diesem Text (keine Ueberschrift wie "Drehbuch:",
@@ -261,7 +279,7 @@ def generate_capcut_drehbuch(thema, cover_frage, caption, kontext=""):
     )
     resp = _client().messages.create(
         model=MODEL,
-        max_tokens=700,
+        max_tokens=1500,
         system=_capcut_system_prompt(),
         messages=[{"role": "user", "content": user_msg}],
     )
