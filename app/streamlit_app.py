@@ -8,6 +8,7 @@ Thema eingeben -> Cover-Frage waehlen -> Slides & Caption generieren
 """
 
 import base64
+import html as html_lib
 import io
 import os
 import re
@@ -206,7 +207,6 @@ if st.session_state.render_ergebnis:
 
     if st.session_state.png_paths:
         st.success(f"{len(st.session_state.png_paths)} PNGs erzeugt (jeweils 1080x1350px).")
-        st.image(st.session_state.png_paths, width=150)
 
         aktuelle_caption = st.session_state.get("caption_edit", st.session_state.slides_ergebnis["caption"])
         zip_buffer = io.BytesIO()
@@ -225,17 +225,58 @@ if st.session_state.render_ergebnis:
             st.caption(
                 "Auf dem iPhone: Bild antippen und gedrueckt halten, dann "
                 "'Zu Fotos hinzufuegen' waehlen - jedes Bild kommt in voller "
-                "Aufloesung (1080x1350px) in deine Fotomediathek."
+                "Aufloesung (1080x1350px) in deine Fotomediathek. Die Reihenfolge "
+                "hier ist absichtlich umgekehrt (Slide 9 zuerst, Slide 1 zuletzt), "
+                "damit die neueste (= zuerst in Fotos angezeigte) Aufnahme Slide 1 "
+                "ist - so landen sie beim Hochladen in Instagram richtig sortiert."
             )
-            for i, png_path in enumerate(st.session_state.png_paths, start=1):
+            nummerierte_pfade = list(enumerate(st.session_state.png_paths, start=1))
+            for i, png_path in reversed(nummerierte_pfade):
                 st.image(png_path, caption=f"Slide {i}/9", use_container_width=True)
 
     st.header("8. Caption")
     st.text_area(
         "Caption (zum Bearbeiten)", st.session_state.slides_ergebnis["caption"], height=200, key="caption_edit"
     )
-    st.caption("Zum Kopieren: Maus ueber das Feld unten halten (bzw. am Handy antippen) und auf das Kopier-Symbol oben rechts tippen.")
-    st.code(st.session_state["caption_edit"], language=None)
+    st.caption("Kopieren fuer Instagram:")
+    caption_escaped = html_lib.escape(st.session_state["caption_edit"])
+    copy_component_html = f"""
+    <div style="font-family:'Source Sans Pro', sans-serif;">
+      <textarea id="capbox" readonly style="width:100%; box-sizing:border-box; height:160px;
+        padding:8px; border-radius:6px; border:1px solid #ccc; font-family:inherit;
+        font-size:14px; resize:vertical;">{caption_escaped}</textarea>
+      <button id="copybtn" style="margin-top:8px; padding:8px 16px; border-radius:6px;
+        border:none; background:#C15A2E; color:white; font-size:14px; cursor:pointer;">
+        Caption kopieren
+      </button>
+      <span id="copystatus" style="margin-left:10px; font-size:14px; color:#2E4A3B;"></span>
+    </div>
+    <script>
+      const box = document.getElementById('capbox');
+      const btn = document.getElementById('copybtn');
+      const status = document.getElementById('copystatus');
+      btn.addEventListener('click', function() {{
+        box.focus();
+        box.select();
+        box.setSelectionRange(0, box.value.length);
+        let ok = false;
+        try {{ ok = document.execCommand('copy'); }} catch (e) {{ ok = false; }}
+        if (ok) {{
+          status.textContent = 'Kopiert!';
+        }} else if (navigator.clipboard && navigator.clipboard.writeText) {{
+          navigator.clipboard.writeText(box.value).then(function() {{
+            status.textContent = 'Kopiert!';
+          }}).catch(function() {{
+            status.textContent = 'Kopieren fehlgeschlagen - bitte Text manuell markieren.';
+          }});
+        }} else {{
+          status.textContent = 'Kopieren fehlgeschlagen - bitte Text manuell markieren.';
+        }}
+        setTimeout(function() {{ status.textContent = ''; }}, 2500);
+      }});
+    </script>
+    """
+    st.components.v1.html(copy_component_html, height=230)
 
     if st.button("Als fertigen Post in der Historie speichern"):
         r = st.session_state.recherche
