@@ -217,48 +217,43 @@ def generate_slides_und_caption(thema, cover_frage, kontext=""):
     return _tool_input(resp)
 
 
-BILDSTIL_KLAMMER = (
-    "[Bildstil: NUR 2D, flach, handgezeichnet wirkend im Stil der "
-    "1960er-Jahre (wie alte Kinderbuch-/Poster-Illustrationen) - klare "
-    "Konturen, flache Farbflaechen. KEIN 3D, KEIN Computer-Rendering, "
-    "KEIN Fotorealismus, KEIN Glanz, KEIN Farbverlauf, KEIN Schlagschatten.]"
+BILDSTIL_TEXT = (
+    "durchgehend im Stil einer flachen, handgezeichneten 2D-Illustration "
+    "der 1960er-Jahre (wie alte Kinderbuch-/Poster-Illustrationen), klare "
+    "Konturen, flache Farbflaechen, sanfte ruhige Animation - ausdruecklich "
+    "KEIN 3D, KEIN Computer-Rendering, KEIN Fotorealismus, KEIN Glanz, "
+    "KEIN Farbverlauf, KEIN Schlagschatten"
 )
 
-CAPCUT_ANWEISUNG = f"""
-Erstelle ein Drehbuch fuer ein kurzes 10-Sekunden-Video zu diesem Post,
-gedacht zum Einfuegen in CapCuts "Text to Video"-Feature.
+GEMINI_VIDEO_ANWEISUNG = f"""
+Erstelle EINEN einzelnen, zusammenhaengenden Video-Generierungs-Prompt
+(Fliesstext-Absatz, KEIN Szenen-Raster mit Zeitangaben) fuer Google
+Gemini/Veo Videogenerierung, passend zu diesem Post. Der Prompt muss
+folgende Punkte abdecken - alles in einem fliessenden Absatz, nicht als
+Liste/Aufzaehlung:
 
-STRENGE BILDSTIL-REGEL (wortwoertlich in JEDER einzelnen Szene als
-Klammerzusatz anhaengen, nicht nur einmal am Ende - CapCut haelt sich
-sonst erfahrungsgemaess nicht daran und rendert stattdessen 3D-Grafik):
-"{BILDSTIL_KLAMMER}"
-
-Format:
-
-- Mehrere Szenen mit Zeitangaben in Sekunden, die zusammen genau 10
-  Sekunden ergeben (z.B. "0-2s: ...", "2-4,5s: ...", "4,5-7s: ...", ...).
-- Jede Szene bekommt einen kurzen On-Screen-Text (max. 5-7 Woerter - muss
-  in der jeweiligen Zeit gut lesbar sein), DANACH auf derselben Zeile
-  die Bildstil-Klammer von oben, woertlich identisch wiederholt.
-- Spannungsbogen wie beim Post: Hook (passend zur Cover-Frage) -> ein
-  Kerngedanke aus dem Post -> kurzer Payoff/Aha-Moment.
-- Letzte Szene: kurzer CTA, z.B. "Folge @KopfnussPsychologie fuer mehr".
-- Danach, getrennt durch eine Leerzeile, 2-3 Zeilen "Design-Hinweise
-  fuer CapCut": zuerst NOCHMAL ausdruecklich betonen, dass ausschliesslich
-  2D/handgezeichnete Flat-Illustration im 60er-Jahre-Stil gewuenscht ist
-  und 3D/Computer-Rendering/Fotorealismus in KEINEM Frame vorkommen darf,
-  danach welche Kopfnuss-Farben (Terrakotta #C15A2E, Salbeigruen #8FBFA0,
-  Dunkelgruen #2E4A3B, Gold #EDA23E, Creme-Hintergrund #FBF6EF) und
-  welche Schriftstimmung (kraeftige Serifen-Headlines, klare
-  serifenlose Fliesstext-Schrift) fuer Untertitel/Vorlage in CapCut
-  gewaehlt werden sollten, damit das Video zum Post passt.
-- Antworte NUR mit diesem Text (keine Ueberschrift wie "Drehbuch:",
-  keine Einleitung), direkt mit der ersten Szene beginnen - der Text
-  wird 1:1 kopiert.
+- Laenge/Dauer: ca. 10 Sekunden.
+- Bildstil (gleich zu Beginn UND nochmal gegen Ende des Prompts
+  betonen, damit er nicht "verloren geht"): "{BILDSTIL_TEXT}".
+- Farbpalette: Terrakotta #C15A2E, Salbeigruen #8FBFA0, Dunkelgruen
+  #2E4A3B, Gold #EDA23E, Creme-Hintergrund #FBF6EF.
+- Inhaltlicher Spannungsbogen wie beim Post: Hook (passend zur
+  Cover-Frage) -> ein Kerngedanke aus dem Post -> kurzer Payoff/CTA
+  ("Folge @KopfnussPsychologie").
+- Der einzublendende Text muss WOERTLICH in Anfuehrungszeichen im
+  Prompt genannt werden (z.B. per Formulierung 'zuerst erscheint der
+  Text "...", dann "...", am Ende "..."') - Video-KI-Modelle rendern
+  eingeblendeten Text nur dann einigermassen zuverlaessig, wenn er
+  explizit zitiert statt nur umschrieben wird. Maximal 3 kurze
+  Text-Einblendungen (je max. 5-6 Woerter), laengerer Text wird im
+  Video meist unleserlich/verzerrt.
+- Antworte NUR mit diesem einen Prompt-Absatz (keine Ueberschrift wie
+  "Prompt:", keine Einleitung, keine Szenenliste) - der Text wird 1:1
+  in Gemini eingefuegt.
 """
 
 
-def _capcut_system_prompt():
+def _video_system_prompt():
     return (
         "Du bist die Text-Redaktion fuer den Instagram-Kanal @KopfnussPsychologie "
         "(Betreiber: Diplom-Psychologe). Halte dich an Ton, Sprache und Themenwahl "
@@ -266,21 +261,21 @@ def _capcut_system_prompt():
     )
 
 
-def generate_capcut_drehbuch(thema, cover_frage, caption, kontext=""):
-    """Generiert ein 10-Sekunden-Kurzvideo-Drehbuch (Szenen mit Zeitangaben +
-    kurze Design-Hinweise) fuer CapCuts 'Text to Video'-Feature, passend zum
-    fertigen Post (Cover-Frage + Caption als inhaltliche Grundlage)."""
+def generate_gemini_video_prompt(thema, cover_frage, caption, kontext=""):
+    """Generiert einen einzelnen Video-Generierungs-Prompt (~10 Sekunden) fuer
+    Google Gemini/Veo Videogenerierung, passend zum fertigen Post
+    (Cover-Frage + Caption als inhaltliche Grundlage)."""
     user_msg = (
         f"Thema: {thema}\n"
         f"Cover-Frage (Slide 1): {cover_frage}\n"
         f"Caption des fertigen Posts:\n{caption}\n\n"
         + (f"Rechercheergebnisse/Kontext:\n{kontext}\n\n" if kontext else "")
-        + CAPCUT_ANWEISUNG
+        + GEMINI_VIDEO_ANWEISUNG
     )
     resp = _client().messages.create(
         model=MODEL,
-        max_tokens=1500,
-        system=_capcut_system_prompt(),
+        max_tokens=800,
+        system=_video_system_prompt(),
         messages=[{"role": "user", "content": user_msg}],
     )
     text_block = next(b for b in resp.content if b.type == "text")

@@ -21,7 +21,7 @@ from research_module import research_thema
 from text_module import (
     generate_cover_optionen,
     generate_slides_und_caption,
-    generate_capcut_drehbuch,
+    generate_gemini_video_prompt,
     assemble_slides,
 )
 from render_module import (
@@ -108,7 +108,7 @@ for key, default in [
     ("render_ergebnis", None),
     ("png_paths", None),
     ("cover_bild_bytes", None),
-    ("capcut_drehbuch", None),
+    ("video_prompt", None),
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -183,8 +183,8 @@ if st.session_state.cover_optionen:
                 st.session_state.pop(f"trio_text_{i}_{j}", None)
         st.session_state.pop("fazit_body_edit", None)
         st.session_state.pop("caption_edit", None)
-        st.session_state.capcut_drehbuch = None
-        st.session_state.pop("drehbuch_edit", None)
+        st.session_state.video_prompt = None
+        st.session_state.pop("video_prompt_edit", None)
 
     if st.session_state.slides_ergebnis:
         st.header("5. Texte bearbeiten (optional)")
@@ -296,26 +296,26 @@ if st.session_state.render_ergebnis:
     st.caption("Kopieren fuer Instagram:")
     copy_button_widget(st.session_state["caption_edit"], label="Caption kopieren")
 
-    st.header("9. Drehbuch fuer CapCut (Text-to-Video, 10 Sekunden)")
-    if st.button("Drehbuch erzeugen"):
-        with st.spinner("Claude schreibt das 10-Sekunden-Drehbuch..."):
-            st.session_state.capcut_drehbuch = generate_capcut_drehbuch(
+    st.header("9. Video-Prompt fuer Gemini Video (ca. 10 Sekunden)")
+    if st.button("Video-Prompt erzeugen"):
+        with st.spinner("Claude schreibt den Gemini-Video-Prompt..."):
+            st.session_state.video_prompt = generate_gemini_video_prompt(
                 thema, cover_frage, st.session_state["caption_edit"], kontext=kontext
             )
 
-    if st.session_state.capcut_drehbuch:
+    if st.session_state.video_prompt:
         st.text_area(
-            "Drehbuch (zum Bearbeiten)",
-            st.session_state.capcut_drehbuch,
-            height=260,
-            key="drehbuch_edit",
+            "Video-Prompt (zum Bearbeiten)",
+            st.session_state.video_prompt,
+            height=220,
+            key="video_prompt_edit",
         )
-        st.caption("Kopieren fuer CapCut:")
+        st.caption("Kopieren fuer Gemini Video:")
         copy_button_widget(
-            st.session_state.get("drehbuch_edit", st.session_state.capcut_drehbuch),
-            label="Drehbuch kopieren",
-            height=310,
-            box_height=240,
+            st.session_state.get("video_prompt_edit", st.session_state.video_prompt),
+            label="Video-Prompt kopieren",
+            height=270,
+            box_height=200,
         )
 
     if st.button("Als fertigen Post in der Historie speichern"):
