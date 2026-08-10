@@ -119,7 +119,9 @@ for key, default in [
         st.session_state[key] = default
 
 st.header("1. Thema")
-thema = st.text_input("Worum soll der Post gehen?", key="thema_input")
+with st.container(horizontal=True, vertical_alignment="bottom"):
+    thema = st.text_input("Worum soll der Post gehen?", key="thema_input")
+    st.button("Bestaetigen", icon=":material/keyboard_return:", help="Eingabe bestaetigen")
 farbthema = st.radio("Farbthema", ["klassisch", "gruen"], horizontal=True)
 
 if thema:
