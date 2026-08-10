@@ -119,9 +119,7 @@ for key, default in [
         st.session_state[key] = default
 
 st.header("1. Thema")
-with st.form("thema_form", border=False):
-    thema = st.text_input("Worum soll der Post gehen?", key="thema_input")
-    recherche_clicked = st.form_submit_button("Quelle recherchieren", disabled=not thema)
+thema = st.text_input("Worum soll der Post gehen?", key="thema_input")
 farbthema = st.radio("Farbthema", ["klassisch", "gruen"], horizontal=True)
 
 if thema:
@@ -132,7 +130,7 @@ if thema:
             st.write(f"- {t['thema']} ({t['cover_frage']})")
 
 st.header("2. Quelle recherchieren")
-if recherche_clicked:
+if st.button("Quelle recherchieren", disabled=not thema):
     with st.spinner("Suche nach einer passenden Studie (Semantic Scholar, sonst Websuche)..."):
         st.session_state.recherche = research_thema(thema)
 
