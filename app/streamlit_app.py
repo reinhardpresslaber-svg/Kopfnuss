@@ -18,7 +18,7 @@ import zipfile
 import streamlit as st
 
 from post_historie import check_topic, append_post
-from research_module import research_thema
+from research_module import schlage_studien_vor
 from text_module import (
     generate_cover_optionen,
     generate_slides_und_caption,
@@ -114,6 +114,7 @@ for key, default in [
     ("png_paths", None),
     ("cover_bild_bytes", None),
     ("video_prompt", None),
+    ("studien_vorschlaege", None),
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -133,13 +134,27 @@ if thema:
 
 st.header("2. Quelle recherchieren")
 if st.button("Quelle recherchieren", disabled=not thema):
-    with st.spinner("Suche nach einer passenden Studie (Semantic Scholar, sonst Websuche)..."):
-        st.session_state.recherche = research_thema(thema)
+    with st.spinner("Claude nennt 3 passende Studien..."):
+        st.session_state.studien_vorschlaege = schlage_studien_vor(thema)
+    st.session_state.recherche = None
+
+if st.session_state.studien_vorschlaege:
+    studien = st.session_state.studien_vorschlaege
+    optionen = [f"{s['titel']} - {s['autoren']} ({s['jahr']})" for s in studien]
+    auswahl_idx = st.radio(
+        "Welche Studie passt am besten?",
+        range(len(optionen)),
+        format_func=lambda i: optionen[i],
+        key="studie_auswahl",
+    )
+    st.session_state.recherche = studien[auswahl_idx]
+    st.caption(
+        "Von Claude aus dem eigenen Wissen vorgeschlagen, nicht live recherchiert - "
+        "bei Bedarf selbst gegenchecken."
+    )
 
 if st.session_state.recherche:
     r = st.session_state.recherche
-    art = "wissenschaftliche Datenbank" if r["quelle_typ"] == "wissenschaftliche_datenbank" else "Websuche"
-    st.info(f"**{r['titel']}**\n\n{r['autoren']} ({r['jahr']}) - Quelle: {art}")
     with st.expander("Details (Kernbefund, Methodik, Limitationen)"):
         st.write("**Kernbefund:**", r["kernbefund"])
         st.write("**Methodik:**", r["methodik"])
