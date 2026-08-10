@@ -24,6 +24,7 @@ from text_module import (
     generate_slides_und_caption,
     generate_gemini_video_prompt,
     proofread_slides_und_caption,
+    proofread_cover_optionen,
     assemble_slides,
 )
 from render_module import (
@@ -118,7 +119,9 @@ for key, default in [
         st.session_state[key] = default
 
 st.header("1. Thema")
-thema = st.text_input("Worum soll der Post gehen?", key="thema_input")
+with st.form("thema_form", border=False):
+    thema = st.text_input("Worum soll der Post gehen?", key="thema_input")
+    recherche_clicked = st.form_submit_button("Quelle recherchieren", disabled=not thema)
 farbthema = st.radio("Farbthema", ["klassisch", "gruen"], horizontal=True)
 
 if thema:
@@ -129,7 +132,7 @@ if thema:
             st.write(f"- {t['thema']} ({t['cover_frage']})")
 
 st.header("2. Quelle recherchieren")
-if st.button("Quelle recherchieren", disabled=not thema):
+if recherche_clicked:
     with st.spinner("Suche nach einer passenden Studie (Semantic Scholar, sonst Websuche)..."):
         st.session_state.recherche = research_thema(thema)
 
@@ -146,7 +149,8 @@ kontext = recherche_als_kontext(st.session_state.recherche) if st.session_state.
 
 if st.button("Cover-Vorschlaege generieren", disabled=not thema):
     with st.spinner("Claude ueberlegt sich 3 Formulierungen..."):
-        st.session_state.cover_optionen = generate_cover_optionen(thema, kontext=kontext)
+        vorschlaege = generate_cover_optionen(thema, kontext=kontext)
+        st.session_state.cover_optionen = proofread_cover_optionen(vorschlaege)
     st.session_state.slides_ergebnis = None
     st.session_state.render_ergebnis = None
     st.session_state.cover_bild_bytes = None
@@ -294,7 +298,7 @@ if st.session_state.render_ergebnis:
             )
             nummerierte_pfade = list(enumerate(st.session_state.png_paths, start=1))
             for i, png_path in reversed(nummerierte_pfade):
-                st.image(png_path, caption=f"Slide {i}/9", use_container_width=True)
+                st.image(png_path, caption=f"Slide {i}/9", width="stretch")
 
     st.header("8. Caption")
     st.text_area(

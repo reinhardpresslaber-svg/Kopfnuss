@@ -354,19 +354,16 @@ def _sammle_proofreading_items(slides_ergebnis, caption):
     return items, parsed_slides
 
 
-def proofread_slides_und_caption(slides_ergebnis, caption):
+def _proofread_items(items):
     """
-    Laesst Claude alle Texte (Slide-Headlines/Bodies, Fazit, Caption) auf
-    kaputte Umlaute, Grammatikfehler und fehlende Woerter pruefen und
-    korrigieren - Inhalt/Ton bleiben unveraendert, nur Fehler werden
-    behoben. Gibt ein korrigiertes slides_ergebnis-Dict (gleiche Form wie
-    generate_slides_und_caption()) zurueck.
+    Schickt eine flache Liste von (id, text)-Paaren zum Proofreading an
+    Claude (kaputte Umlaute/scharfes-S, Grammatik, fehlende Woerter) und
+    gibt ein Dict id -> korrigierter Text zurueck (fuer JEDE eingereichte ID,
+    auch unveraendert gebliebene).
     """
-    items, parsed_slides = _sammle_proofreading_items(slides_ergebnis, caption)
-
     eingabe = "\n\n".join(f'ID: {id_}\nText: "{text}"' for id_, text in items)
     user_msg = (
-        "Pruefe folgende Textfelder eines fertigen Instagram-Posts auf drei "
+        "Pruefe folgende Textfelder eines Instagram-Posts auf drei "
         "Fehlerarten: (1) als ae/oe/ue/ss ausgeschriebene statt echter "
         "Umlaute/scharfes-S - ersetze IMMER durch das richtige Zeichen, "
         "z.B. 'Woerter' -> 'Wörter', 'Koerper' -> 'Körper', "
@@ -387,7 +384,27 @@ def proofread_slides_und_caption(slides_ergebnis, caption):
         tool_choice={"type": "tool", "name": "korrekturen"},
         messages=[{"role": "user", "content": user_msg}],
     )
-    korrekturen = {k["id"]: k["text"] for k in _tool_input(resp)["korrekturen"]}
+    return {k["id"]: k["text"] for k in _tool_input(resp)["korrekturen"]}
+
+
+def proofread_cover_optionen(cover_optionen):
+    """Prueft die 3 Cover-Frage-Vorschlaege (Slide 1) auf kaputte Umlaute,
+    Grammatikfehler und fehlende Woerter - Inhalt/Ton bleiben unveraendert."""
+    items = [(f"cover{i}", text) for i, text in enumerate(cover_optionen)]
+    korrekturen = _proofread_items(items)
+    return [korrekturen.get(f"cover{i}", text) for i, text in enumerate(cover_optionen)]
+
+
+def proofread_slides_und_caption(slides_ergebnis, caption):
+    """
+    Laesst Claude alle Texte (Slide-Headlines/Bodies, Fazit, Caption) auf
+    kaputte Umlaute, Grammatikfehler und fehlende Woerter pruefen und
+    korrigieren - Inhalt/Ton bleiben unveraendert, nur Fehler werden
+    behoben. Gibt ein korrigiertes slides_ergebnis-Dict (gleiche Form wie
+    generate_slides_und_caption()) zurueck.
+    """
+    items, parsed_slides = _sammle_proofreading_items(slides_ergebnis, caption)
+    korrekturen = _proofread_items(items)
 
     korrigierte_slides = []
     for i, (s, parsed) in enumerate(zip(slides_ergebnis["slides_2_bis_8"], parsed_slides), start=2):
