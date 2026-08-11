@@ -261,39 +261,45 @@ def generate_slides_und_caption(thema, cover_frage, kontext=""):
     return _tool_input(resp)
 
 
-BILDSTIL_TEXT = (
-    "durchgehend im Stil einer flachen, handgezeichneten 2D-Illustration "
-    "der 1960er-Jahre (wie alte Kinderbuch-/Poster-Illustrationen), klare "
-    "Konturen, flache Farbflaechen, sanfte ruhige Animation - ausdruecklich "
-    "KEIN 3D, KEIN Computer-Rendering, KEIN Fotorealismus, KEIN Glanz, "
-    "KEIN Farbverlauf, KEIN Schlagschatten"
-)
+REEL_TEXT_TOOL = {
+    "name": "reel_zeilen",
+    "description": "Reicht genau 6 kurze Textzeilen fuer ein Reel ein.",
+    "strict": True,
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "zeilen": {
+                "type": "array",
+                "description": (
+                    "Genau 6 kurze Textzeilen, die im Reel nacheinander "
+                    "eingeblendet werden (jede bleibt stehen, der Text baut "
+                    "sich also zeilenweise auf)."
+                ),
+                "items": {"type": "string"},
+            }
+        },
+        "required": ["zeilen"],
+        "additionalProperties": False,
+    },
+}
 
-GEMINI_VIDEO_ANWEISUNG = f"""
-Erstelle EINEN einzelnen, zusammenhaengenden Video-Generierungs-Prompt
-(Fliesstext-Absatz, KEIN Szenen-Raster mit Zeitangaben) fuer Google
-Gemini/Veo Videogenerierung, passend zu diesem Post. Der Prompt muss
-folgende Punkte abdecken - alles in einem fliessenden Absatz, nicht als
-Liste/Aufzaehlung:
+REEL_TEXT_ANWEISUNG = """
+Erstelle genau 6 sehr kurze, catchy Textzeilen fuer ein Reel im
+Kinetic-Typography-Stil: die Zeilen werden nacheinander ueber dem
+9:16-Reel-Hintergrundbild eingeblendet, jede neue Zeile bleibt stehen,
+sodass sich der Text zeilenweise aufbaut, bis der Bildschirm gefuellt
+ist. Jede Zeile: max. 5-6 Woerter, in lesbarer Groesse gedacht (nicht
+zu lang, sonst passt der Text nicht auf den Bildschirm).
 
-- Laenge/Dauer: ca. 10 Sekunden.
-- Bildstil (gleich zu Beginn UND nochmal gegen Ende des Prompts
-  betonen, damit er nicht "verloren geht"): "{BILDSTIL_TEXT}".
-- Farbpalette: Terrakotta #C15A2E, Salbeigruen #8FBFA0, Dunkelgruen
-  #2E4A3B, Gold #EDA23E, Creme-Hintergrund #FBF6EF.
-- Inhaltlicher Spannungsbogen wie beim Post: Hook (passend zur
-  Cover-Frage) -> ein Kerngedanke aus dem Post -> kurzer Payoff/CTA
-  ("Folge @KopfnussPsychologie").
-- Der einzublendende Text muss WOERTLICH in Anfuehrungszeichen im
-  Prompt genannt werden (z.B. per Formulierung 'zuerst erscheint der
-  Text "...", dann "...", am Ende "..."') - Video-KI-Modelle rendern
-  eingeblendeten Text nur dann einigermassen zuverlaessig, wenn er
-  explizit zitiert statt nur umschrieben wird. Maximal 3 kurze
-  Text-Einblendungen (je max. 5-6 Woerter), laengerer Text wird im
-  Video meist unleserlich/verzerrt.
-- Antworte NUR mit diesem einen Prompt-Absatz (keine Ueberschrift wie
-  "Prompt:", keine Einleitung, keine Szenenliste) - der Text wird 1:1
-  in Gemini eingefuegt.
+Aufbau wie ein Mini-Spannungsbogen:
+1. Hook (passend zur Cover-Frage)
+2-4. Zentraler Kernbefund/Mechanismus der Studie, auf 2-3 knappe
+     Zeilen heruntergebrochen
+5. Kurzer Payoff/Aha-Moment
+6. CTA, z.B. "Folge @KopfnussPsychologie fuer mehr"
+
+Ton wie im Design-System: seriös, klar, mit 'du' angesprochen - kein
+Clickbait. Reiche die 6 Zeilen ueber das Werkzeug 'reel_zeilen' ein.
 """
 
 
@@ -305,25 +311,27 @@ def _editorial_system_prompt():
     )
 
 
-def generate_gemini_video_prompt(thema, cover_frage, caption, kontext=""):
-    """Generiert einen einzelnen Video-Generierungs-Prompt (~10 Sekunden) fuer
-    Google Gemini/Veo Videogenerierung, passend zum fertigen Post
-    (Cover-Frage + Caption als inhaltliche Grundlage)."""
+def generate_reel_text_lines(thema, cover_frage, caption, kontext=""):
+    """Generiert 6 kurze Textzeilen (Kinetic-Typography-Stil), die im Reel
+    nacheinander ueber dem 9:16-Hintergrundbild eingeblendet werden - fasst
+    den fertigen Post (Cover-Frage + Caption als inhaltliche Grundlage)
+    catchy zusammen."""
     user_msg = (
         f"Thema: {thema}\n"
         f"Cover-Frage (Slide 1): {cover_frage}\n"
         f"Caption des fertigen Posts:\n{caption}\n\n"
         + (f"Rechercheergebnisse/Kontext:\n{kontext}\n\n" if kontext else "")
-        + GEMINI_VIDEO_ANWEISUNG
+        + REEL_TEXT_ANWEISUNG
     )
     resp = _client().messages.create(
         model=MODEL,
         max_tokens=800,
         system=_editorial_system_prompt(),
+        tools=[REEL_TEXT_TOOL],
+        tool_choice={"type": "tool", "name": "reel_zeilen"},
         messages=[{"role": "user", "content": user_msg}],
     )
-    text_block = next(b for b in resp.content if b.type == "text")
-    return _clean(text_block.text).strip()
+    return _tool_input(resp)["zeilen"]
 
 
 PROOFREAD_TOOL = {

@@ -22,7 +22,7 @@ from research_module import schlage_studien_vor
 from text_module import (
     generate_cover_optionen,
     generate_slides_und_caption,
-    generate_gemini_video_prompt,
+    generate_reel_text_lines,
     proofread_slides_und_caption,
     proofread_cover_optionen,
     assemble_slides,
@@ -125,7 +125,7 @@ for key, default in [
     ("render_ergebnis", None),
     ("png_paths", None),
     ("cover_bild_bytes", None),
-    ("video_prompt", None),
+    ("reel_text_lines", None),
     ("studien_vorschlaege", None),
     ("reel_cover_path", None),
 ]:
@@ -228,8 +228,8 @@ if st.session_state.cover_optionen:
                 st.session_state.pop(f"trio_text_{i}_{j}", None)
         st.session_state.pop("fazit_body_edit", None)
         st.session_state.pop("caption_edit", None)
-        st.session_state.video_prompt = None
-        st.session_state.pop("video_prompt_edit", None)
+        st.session_state.reel_text_lines = None
+        st.session_state.pop("reel_text_edit", None)
 
     if st.session_state.slides_ergebnis:
         st.header("5. Texte bearbeiten (optional)")
@@ -361,26 +361,31 @@ if st.session_state.render_ergebnis:
     st.caption("Kopieren fuer Instagram:")
     copy_button_widget(st.session_state["caption_edit"], label="Caption kopieren")
 
-    st.header("9. Video-Prompt fuer Gemini Video (ca. 10 Sekunden)")
-    if st.button("Video-Prompt erzeugen"):
-        with st.spinner("Claude schreibt den Gemini-Video-Prompt..."):
-            st.session_state.video_prompt = generate_gemini_video_prompt(
+    st.header("9. Reel-Text (fuer 9:16-Hintergrund)")
+    if st.button("Reel-Text erzeugen"):
+        with st.spinner("Claude schreibt 6 kurze Reel-Zeilen..."):
+            st.session_state.reel_text_lines = generate_reel_text_lines(
                 thema, cover_frage, st.session_state["caption_edit"], kontext=kontext
             )
 
-    if st.session_state.video_prompt:
+    if st.session_state.reel_text_lines:
+        reel_text_joined = "\n".join(st.session_state.reel_text_lines)
         st.text_area(
-            "Video-Prompt (zum Bearbeiten)",
-            st.session_state.video_prompt,
-            height=220,
-            key="video_prompt_edit",
+            "Reel-Zeilen (zum Bearbeiten, eine Zeile pro Text-Einblendung)",
+            reel_text_joined,
+            height=180,
+            key="reel_text_edit",
         )
-        st.caption("Kopieren fuer Gemini Video:")
+        st.caption(
+            "Diese Zeilen nacheinander als Text-Einblendungen ueber dem "
+            "Reel-Hintergrund (Schritt 7) platzieren, z.B. in CapCut - jede "
+            "Zeile bleibt stehen, der Text baut sich so zeilenweise auf."
+        )
         copy_button_widget(
-            st.session_state.get("video_prompt_edit", st.session_state.video_prompt),
-            label="Video-Prompt kopieren",
-            height=270,
-            box_height=200,
+            st.session_state.get("reel_text_edit", reel_text_joined),
+            label="Reel-Text kopieren",
+            height=230,
+            box_height=160,
         )
 
     if not st.session_state.png_paths:
@@ -403,9 +408,13 @@ if st.session_state.render_ergebnis:
         aktuelle_caption = st.session_state.get("caption_edit", st.session_state.slides_ergebnis["caption"])
         with open(os.path.join(post_dir, "caption.txt"), "w", encoding="utf-8") as f:
             f.write(aktuelle_caption)
-        if st.session_state.video_prompt:
-            aktueller_video_prompt = st.session_state.get("video_prompt_edit", st.session_state.video_prompt)
-            with open(os.path.join(post_dir, "video_prompt.txt"), "w", encoding="utf-8") as f:
-                f.write(aktueller_video_prompt)
+        if st.session_state.reel_text_lines:
+            aktueller_reel_text = st.session_state.get(
+                "reel_text_edit", "\n".join(st.session_state.reel_text_lines)
+            )
+            with open(os.path.join(post_dir, "reel_text.txt"), "w", encoding="utf-8") as f:
+                f.write(aktueller_reel_text)
+        if st.session_state.reel_cover_path:
+            shutil.copy2(st.session_state.reel_cover_path, os.path.join(post_dir, "reel_hintergrund_9x16.png"))
 
         st.success(f"Gespeichert in post_historie.json und in {post_dir}")
