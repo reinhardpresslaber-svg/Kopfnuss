@@ -90,12 +90,15 @@ def _remove_chroma_key(img, key_color=CHROMA_KEY, tolerance=60, feather=40):
     return Image.fromarray(data, "RGBA")
 
 
-def _clear_left_zone(img, fraction=0.37):
+def _clear_left_zone(img, fraction=0.18):
     """
     Loescht (macht transparent) den linken Bildbereich hart, egal was
     dort generiert wurde - verlaesslicher als sich nur auf die
     Prompt-Anweisung "Schwerpunkt rechts" zu verlassen, da Gemini
-    gelegentlich trotzdem einzelne Icons/Linien links platziert.
+    gelegentlich trotzdem einzelne Icons/Linien links platziert. Seit die
+    Deckkraft des Motivs auf der Slide gesenkt wurde (siehe
+    render_module.build_cover_slide), stoert Bildinhalt links nicht mehr
+    so stark - daher weniger stark beschnitten als frueher (0.37 -> 0.18).
     """
     data = np.array(img)
     cut = round(img.width * fraction)

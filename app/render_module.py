@@ -107,7 +107,7 @@ def build_cover_slide(cover_frage, bild_b64=None):
         bild_layer = (
             f'<img src="data:image/png;base64,{bild_b64}" alt="" '
             f'style="position:absolute; top:-90px; left:-84px; width:1080px; height:1350px; '
-            f'object-fit:contain; opacity:0.5; z-index:1; pointer-events:none;"/>'
+            f'object-fit:contain; opacity:0.3; z-index:1; pointer-events:none;"/>'
         )
     return {
         "eyebrow": "1/9",
