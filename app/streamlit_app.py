@@ -30,6 +30,7 @@ from text_module import (
 from render_module import (
     render_carousel,
     export_pngs,
+    export_reel_cover,
     render_cover_preview_html,
     parse_slide_body,
     build_slide_body,
@@ -126,6 +127,7 @@ for key, default in [
     ("cover_bild_bytes", None),
     ("video_prompt", None),
     ("studien_vorschlaege", None),
+    ("reel_cover_path", None),
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
@@ -302,6 +304,15 @@ if st.session_state.render_ergebnis:
     if st.button("9 PNGs erzeugen"):
         with st.spinner("Erzeuge Screenshots der 9 Slides..."):
             st.session_state.png_paths = export_pngs(st.session_state.render_ergebnis["slide_htmls"])
+        with st.spinner("Erzeuge Reel-Hintergrund (9:16)..."):
+            bild_b64_reel = (
+                base64.b64encode(st.session_state.cover_bild_bytes).decode("ascii")
+                if st.session_state.cover_bild_bytes
+                else None
+            )
+            st.session_state.reel_cover_path = export_reel_cover(
+                bild_b64_reel, output_dir=f"_preview_{slugify(thema)}", theme=farbthema
+            )
 
     if st.session_state.png_paths:
         st.success(f"{len(st.session_state.png_paths)} PNGs erzeugt (jeweils 1080x1350px).")
@@ -312,12 +323,17 @@ if st.session_state.render_ergebnis:
             for png_path in st.session_state.png_paths:
                 zf.write(png_path, arcname=os.path.basename(png_path))
             zf.writestr("caption.txt", aktuelle_caption)
+            if st.session_state.reel_cover_path:
+                zf.write(st.session_state.reel_cover_path, arcname="reel_hintergrund_9x16.png")
         st.download_button(
-            "Alle 9 PNGs + Caption als ZIP herunterladen",
+            "Alle 9 PNGs + Caption + Reel-Hintergrund als ZIP herunterladen",
             data=zip_buffer.getvalue(),
             file_name=f"kopfnuss_{slugify(thema)}.zip",
             mime="application/zip",
         )
+
+        if st.session_state.reel_cover_path:
+            st.image(st.session_state.reel_cover_path, caption="Reel-Hintergrund (9:16)", width=200)
 
         with st.expander("Direkt aufs iPhone speichern (ohne ZIP)"):
             st.caption(
@@ -331,6 +347,12 @@ if st.session_state.render_ergebnis:
             nummerierte_pfade = list(enumerate(st.session_state.png_paths, start=1))
             for i, png_path in reversed(nummerierte_pfade):
                 st.image(png_path, caption=f"Slide {i}/9", width="stretch")
+            if st.session_state.reel_cover_path:
+                st.image(
+                    st.session_state.reel_cover_path,
+                    caption="Reel-Hintergrund (9:16) - separat speichern, nicht Teil des Karussells",
+                    width="stretch",
+                )
 
     st.header("8. Caption")
     st.text_area(

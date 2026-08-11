@@ -394,6 +394,73 @@ def export_pngs(slide_html_paths):
     return png_paths
 
 
+def build_reel_cover_html(bild_b64=None, theme="klassisch"):
+    """
+    Baut ein eigenstaendiges 1080x1920px-Bild (9:16, Reel-/Story-Format) nur
+    mit Branding + generiertem Cover-Motiv - OHNE Cover-Frage-Text und ohne
+    "Wische weiter"-Hinweis, als Hintergrund-Grundlage fuer ein Reel.
+    """
+    green_override = THEMES[theme]
+    bild_layer = ""
+    if bild_b64:
+        bild_layer = (
+            f'<img src="data:image/png;base64,{bild_b64}" alt="" '
+            f'style="position:absolute; top:285px; left:0; width:1080px; height:1350px; '
+            f'object-fit:contain; opacity:0.3; z-index:1; pointer-events:none;"/>'
+        )
+    blobs = BLOBS[0]
+    bg_color = BGMAP["bg"]
+    return f"""<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,900&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+{STYLE_BLOCK}
+{green_override}
+html,body{{ margin:0; padding:0; }}
+</style>
+</head>
+<body>
+<div style="width:1080px; height:1920px; position:relative; overflow:hidden; background:{bg_color};">
+  {blobs}
+  {bild_layer}
+  <img src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="position:absolute; top:90px; left:84px; width:220px; height:auto; object-fit:contain; z-index:2;"/>
+  <div class="footer-brand" style="position:absolute; left:84px; bottom:70px; z-index:2;">
+    <div class="line"></div><span>@KopfnussPsychologie</span>
+  </div>
+</div>
+</body>
+</html>"""
+
+
+def export_reel_cover(bild_b64, output_dir, theme="klassisch"):
+    """
+    Baut und rendert das 1080x1920px Reel-Hintergrundbild (siehe
+    build_reel_cover_html()) als PNG. Gibt den Pfad zur erzeugten PNG zurueck.
+    """
+    from pathlib import Path
+
+    from playwright.sync_api import sync_playwright
+
+    os.makedirs(output_dir, exist_ok=True)
+    html_content = build_reel_cover_html(bild_b64=bild_b64, theme=theme)
+    html_path = os.path.join(output_dir, "reel_hintergrund.html")
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
+
+    png_path = os.path.join(output_dir, "reel_hintergrund.png")
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page(viewport={"width": 1080, "height": 1920})
+        page.goto(Path(html_path).resolve().as_uri())
+        page.wait_for_load_state("networkidle")
+        page.screenshot(path=png_path)
+        browser.close()
+    return png_path
+
+
 _INLINE_TAG_RE = re.compile(r"</?(?:em|strong|b|i)>", re.IGNORECASE)
 
 
