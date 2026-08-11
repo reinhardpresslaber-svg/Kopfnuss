@@ -109,6 +109,14 @@
   .headline.big{
     font-size: 78px;
   }
+  .swipe-hint{
+    font-family:'Karla', sans-serif;
+    font-weight:700;
+    font-size: 28px;
+    color: var(--rust);
+    letter-spacing: 0.5px;
+    z-index:2;
+  }
   .body-text{
     font-family:'Karla', sans-serif;
     font-weight:400;

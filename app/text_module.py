@@ -186,9 +186,18 @@ def generate_cover_optionen(thema, kontext=""):
     user_msg = (
         f"Thema: {thema}\n\n"
         + (f"Rechercheergebnisse/Kontext:\n{kontext}\n\n" if kontext else "")
-        + "Erzeuge 3 Formulierungsvorschlaege fuer die Cover-Frage auf Slide 1 "
-        "(catchy, spricht mit 'du' an, siehe Design-System Abschnitt 1). "
-        "Reiche sie ueber das Werkzeug 'cover_vorschlaege' ein."
+        + "Erzeuge 3 Formulierungsvorschlaege fuer die Cover-Frage auf Slide 1 - "
+        "soll ein echter Scroll-Stopper sein (spricht mit 'du' an, siehe "
+        "Design-System Abschnitt 1). Nutze fuer die 3 Vorschlaege bewusst "
+        "unterschiedliche Hook-Techniken: (a) Curiosity-Gap-Frage, die eine "
+        "konkrete Wissensluecke oeffnet statt nur generisch 'Warum...?' zu "
+        "fragen, (b) ueberraschende oder kontraere Behauptung, die einem "
+        "verbreiteten Irrglauben widerspricht, (c) eine konkrete Zahl/"
+        "Zeitangabe statt einer vagen Formulierung (z.B. '3 Sekunden' statt "
+        "'ganz kurz'). Bleib dabei seriös und fachlich fundiert (Diplom-"
+        "Psychologe als Absender) - kein reisserisches Clickbait, sondern "
+        "neugierig machende Praezision. Reiche sie ueber das Werkzeug "
+        "'cover_vorschlaege' ein."
     )
     resp = _client().messages.create(
         model=MODEL,

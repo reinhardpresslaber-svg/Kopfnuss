@@ -114,9 +114,10 @@ def build_cover_slide(cover_frage, bild_b64=None):
         "body": f'''
         {bild_layer}
         <div class="content-mid" style="align-items:flex-start;">
-          <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo"/>
-          <div class="headline" style="font-size:56px; margin-top:30px;">{cover_frage}</div>
+          <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="width:160px;"/>
+          <div class="headline" style="font-size:88px; line-height:1.02; margin-top:34px;">{cover_frage}</div>
         </div>
+        <div class="swipe-hint">Wische weiter &rarr;</div>
         ''',
         "footer": "@KopfnussPsychologie",
     }
