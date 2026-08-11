@@ -196,7 +196,7 @@ if st.session_state.cover_optionen:
         "Cover-Frage - Teil 2 (wird in Terrakotta hervorgehoben):", value=auswahl["teil2"]
     )
     cover_frage = f"{cover_teil1} {cover_teil2}".strip()
-    cover_frage_html = f'{cover_teil1} <span style="color:var(--rust);">{cover_teil2}</span>'
+    cover_frage_html = f'{cover_teil1}<br/><span style="color:var(--rust);">{cover_teil2}</span>'
 
     st.header("4. Cover-Bild")
     bild_button_label = "Neu generieren" if st.session_state.cover_bild_bytes else "Cover-Bild generieren"
