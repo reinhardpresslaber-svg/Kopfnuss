@@ -110,14 +110,14 @@ def build_cover_slide(cover_frage, bild_b64=None):
             f'object-fit:contain; opacity:0.5; z-index:1; pointer-events:none;"/>'
         )
     return {
-        "eyebrow": "01 / 09",
+        "eyebrow": "1/9",
         "body": f'''
         {bild_layer}
         <div class="content-mid" style="align-items:flex-start;">
           <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="width:160px;"/>
           <div class="headline" style="font-size:88px; line-height:1.02; margin-top:34px;">{cover_frage}</div>
         </div>
-        <div class="swipe-hint">Wische weiter &rarr;</div>
+        <div class="swipe-hint" style="text-align:right;">Wische weiter &rarr;</div>
         ''',
         "footer": "@KopfnussPsychologie",
     }
@@ -126,7 +126,7 @@ def build_cover_slide(cover_frage, bild_b64=None):
 def build_cta_slide(fazit_html):
     """Baut Slide 9 (Fazit + CTA): fazit_html ist der freie Fazit-Text, Rest (Icons/Claim) ist fest."""
     return {
-        "eyebrow": "09 / 09 &mdash; Fazit",
+        "eyebrow": "9/9 &mdash; Fazit",
         "body": f'''
         <div class="content-mid">
           <div class="headline">Fazit</div>

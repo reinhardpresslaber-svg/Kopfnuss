@@ -447,7 +447,7 @@ def assemble_slides(cover_frage, slides_2_bis_8, fazit_body, bild_b64=None):
     """Baut die vollstaendige 9er-Slide-Liste fuer render_carousel() zusammen."""
     slides = [build_cover_slide(cover_frage, bild_b64=bild_b64)]
     for i, s in enumerate(slides_2_bis_8, start=2):
-        eyebrow = f"{i:02d} / 09"
+        eyebrow = f"{i}/9"
         if s.get("label"):
             eyebrow += f" &mdash; {s['label']}"
         slides.append({"eyebrow": eyebrow, "body": s["body"], "footer": "@KopfnussPsychologie"})
