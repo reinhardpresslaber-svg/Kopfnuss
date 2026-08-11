@@ -41,6 +41,17 @@ from image_module import generate_cover_bild
 st.set_page_config(page_title="Kopfnuss Post-Generator", page_icon="🥜", layout="centered")
 st.title("🥜 Kopfnuss Post-Generator")
 
+APP_PASSWORT = os.environ.get("APP_PASSWORT")
+if APP_PASSWORT and not st.session_state.get("eingeloggt"):
+    pw = st.text_input("Passwort", type="password", key="login_passwort")
+    if pw:
+        if pw == APP_PASSWORT:
+            st.session_state.eingeloggt = True
+            st.rerun()
+        else:
+            st.error("Falsches Passwort.")
+    st.stop()
+
 POSTS_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Posts")
 
 
