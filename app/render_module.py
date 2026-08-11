@@ -117,9 +117,9 @@ def build_cover_slide(cover_frage, bild_b64=None):
           <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="width:160px;"/>
           <div class="headline" style="font-size:88px; line-height:1.02; margin-top:34px;">{cover_frage}</div>
         </div>
-        <div class="swipe-hint" style="text-align:right;">Wische weiter &rarr;</div>
         ''',
         "footer": "@KopfnussPsychologie",
+        "footer_extra": '<div class="swipe-hint">Wische weiter &rarr;</div>',
     }
 
 
@@ -147,6 +147,7 @@ def make_slide_div(i, s, active=False):
     bg = BGS[i]
     blobs = BLOBS[i]
     nutmark = '<div class="nutmark" style="position:absolute; top:80px; right:84px; width:74px; height:74px; z-index:3;"></div>'
+    footer_extra = s.get("footer_extra", "")
     return f'''
     <div class="slide{active_cls}" data-bg="{bg}" id="slide-{i}">
       <div class="frame">
@@ -154,7 +155,10 @@ def make_slide_div(i, s, active=False):
         {nutmark if i != 0 else ''}
         <div class="eyebrow">{s['eyebrow']}</div>
         {s['body']}
-        <div class="footer-brand"><div class="line"></div><span>{s['footer']}</span></div>
+        <div class="footer-row">
+          <div class="footer-brand"><div class="line"></div><span>{s['footer']}</span></div>
+          {footer_extra}
+        </div>
       </div>
     </div>'''
 
