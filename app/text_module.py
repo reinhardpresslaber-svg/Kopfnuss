@@ -100,15 +100,39 @@ def _system_prompt():
 
 COVER_TOOL = {
     "name": "cover_vorschlaege",
-    "description": "Reicht genau 3 Formulierungsvorschlaege fuer die Cover-Frage (Slide 1) ein.",
+    "description": (
+        "Reicht genau 3 Formulierungsvorschlaege fuer die Cover-Frage (Slide 1) "
+        "ein, jeweils aufgeteilt in teil1 und teil2."
+    ),
     "strict": True,
     "input_schema": {
         "type": "object",
         "properties": {
             "vorschlaege": {
                 "type": "array",
-                "items": {"type": "string"},
-                "description": "Genau 3 Formulierungsvorschlaege.",
+                "description": "Genau 3 Formulierungsvorschlaege, jeweils als teil1/teil2.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "teil1": {
+                            "type": "string",
+                            "description": "Erster Teil der Cover-Frage (Aufbau/Kontext).",
+                        },
+                        "teil2": {
+                            "type": "string",
+                            "description": (
+                                "Zweiter, kurzer Teil (die Pointe/der Clou) - wird auf der "
+                                "Slide farblich hervorgehoben, daher kurz halten (max. ca. "
+                                "5-6 Woerter). Muss sich natuerlich an teil1 anschliessen, "
+                                "wenn man beide mit einem Leerzeichen aneinanderhaengt "
+                                "(eigenes Satzzeichen/Gedankenstrich am Anfang mitliefern, "
+                                "falls fuer den Anschluss noetig)."
+                            ),
+                        },
+                    },
+                    "required": ["teil1", "teil2"],
+                    "additionalProperties": False,
+                },
             }
         },
         "required": ["vorschlaege"],
@@ -196,8 +220,12 @@ def generate_cover_optionen(thema, kontext=""):
         "Zeitangabe statt einer vagen Formulierung (z.B. '3 Sekunden' statt "
         "'ganz kurz'). Bleib dabei seriös und fachlich fundiert (Diplom-"
         "Psychologe als Absender) - kein reisserisches Clickbait, sondern "
-        "neugierig machende Praezision. Reiche sie ueber das Werkzeug "
-        "'cover_vorschlaege' ein."
+        "neugierig machende Praezision.\n\n"
+        "Jeder Vorschlag besteht aus teil1 (Aufbau/Kontext) und teil2 (die "
+        "kurze Pointe/der Clou zum Schluss, z.B. die Zahl, die Frage oder "
+        "die Ueberraschung) - teil2 wird auf der Slide farblich hervorgehoben, "
+        "daher kurz halten. Reiche sie ueber das Werkzeug 'cover_vorschlaege' "
+        "ein."
     )
     resp = _client().messages.create(
         model=MODEL,
@@ -397,11 +425,21 @@ def _proofread_items(items):
 
 
 def proofread_cover_optionen(cover_optionen):
-    """Prueft die 3 Cover-Frage-Vorschlaege (Slide 1) auf kaputte Umlaute,
-    Grammatikfehler und fehlende Woerter - Inhalt/Ton bleiben unveraendert."""
-    items = [(f"cover{i}", text) for i, text in enumerate(cover_optionen)]
+    """Prueft die 3 Cover-Frage-Vorschlaege (Slide 1, je teil1/teil2) auf
+    kaputte Umlaute, Grammatikfehler und fehlende Woerter - Inhalt/Ton
+    bleiben unveraendert."""
+    items = []
+    for i, o in enumerate(cover_optionen):
+        items.append((f"cover{i}_teil1", o["teil1"]))
+        items.append((f"cover{i}_teil2", o["teil2"]))
     korrekturen = _proofread_items(items)
-    return [korrekturen.get(f"cover{i}", text) for i, text in enumerate(cover_optionen)]
+    return [
+        {
+            "teil1": korrekturen.get(f"cover{i}_teil1", o["teil1"]),
+            "teil2": korrekturen.get(f"cover{i}_teil2", o["teil2"]),
+        }
+        for i, o in enumerate(cover_optionen)
+    ]
 
 
 def proofread_slides_und_caption(slides_ergebnis, caption):

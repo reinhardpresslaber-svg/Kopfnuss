@@ -186,9 +186,15 @@ if st.session_state.cover_optionen:
     auswahl = st.radio(
         "Welche Formulierung gefaellt dir am besten?",
         st.session_state.cover_optionen,
+        format_func=lambda o: f"{o['teil1']} {o['teil2']}",
         key="cover_auswahl",
     )
-    cover_frage = st.text_input("Cover-Frage (kannst du hier noch anpassen):", value=auswahl)
+    cover_teil1 = st.text_input("Cover-Frage - Teil 1 (kannst du hier noch anpassen):", value=auswahl["teil1"])
+    cover_teil2 = st.text_input(
+        "Cover-Frage - Teil 2 (wird in Terrakotta hervorgehoben):", value=auswahl["teil2"]
+    )
+    cover_frage = f"{cover_teil1} {cover_teil2}".strip()
+    cover_frage_html = f'{cover_teil1} <span style="color:var(--rust);">{cover_teil2}</span>'
 
     st.header("4. Cover-Bild")
     bild_button_label = "Neu generieren" if st.session_state.cover_bild_bytes else "Cover-Bild generieren"
@@ -198,7 +204,7 @@ if st.session_state.cover_optionen:
 
     if st.session_state.cover_bild_bytes:
         bild_b64_preview = base64.b64encode(st.session_state.cover_bild_bytes).decode("ascii")
-        preview_html = render_cover_preview_html(cover_frage, bild_b64=bild_b64_preview, theme=farbthema)
+        preview_html = render_cover_preview_html(cover_frage_html, bild_b64=bild_b64_preview, theme=farbthema)
         st.components.v1.html(preview_html, height=460)
 
     if st.button("Slides & Caption generieren"):
@@ -274,7 +280,7 @@ if st.session_state.cover_optionen:
                     if st.session_state.cover_bild_bytes
                     else None
                 )
-                slides = assemble_slides(cover_frage, slides_2_bis_8, fazit_body, bild_b64=bild_b64)
+                slides = assemble_slides(cover_frage_html, slides_2_bis_8, fazit_body, bild_b64=bild_b64)
                 slug = slugify(thema)
                 render_ergebnis = render_carousel(
                     slides=slides,
