@@ -44,7 +44,9 @@ st.title("🥜 Kopfnuss Post-Generator")
 
 APP_PASSWORT = os.environ.get("APP_PASSWORT")
 if APP_PASSWORT and not st.session_state.get("eingeloggt"):
-    pw = st.text_input("Passwort", type="password", key="login_passwort")
+    with st.container(horizontal=True, vertical_alignment="bottom"):
+        pw = st.text_input("Passwort", type="password", key="login_passwort")
+        st.button("Bestätigen", icon=":material/keyboard_return:", help="Passwort bestätigen", key="login_bestaetigen")
     if pw:
         if pw == APP_PASSWORT:
             st.session_state.eingeloggt = True
