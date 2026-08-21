@@ -135,13 +135,18 @@ for key, default in [
 st.header("1. Thema")
 with st.container(horizontal=True, vertical_alignment="bottom"):
     thema = st.text_input("Worum soll der Post gehen?", key="thema_input")
-    st.button("Bestaetigen", icon=":material/keyboard_return:", help="Eingabe bestaetigen")
-farbthema = st.radio("Farbthema", ["klassisch", "gruen"], horizontal=True)
+    st.button("Bestätigen", icon=":material/keyboard_return:", help="Eingabe bestätigen")
+farbthema = st.radio(
+    "Farbthema",
+    ["klassisch", "gruen"],
+    format_func=lambda x: {"klassisch": "Klassisch", "gruen": "Grün"}[x],
+    horizontal=True,
+)
 
 if thema:
     treffer = check_topic(thema)
     if treffer:
-        st.warning("Aehnliche Themen gibt es schon:")
+        st.warning("Ähnliche Themen gibt es schon:")
         for t in treffer:
             st.write(f"- {t['thema']} ({t['cover_frage']})")
 
@@ -175,8 +180,8 @@ if st.session_state.recherche:
 
 kontext = recherche_als_kontext(st.session_state.recherche) if st.session_state.recherche else ""
 
-if st.button("Cover-Vorschlaege generieren", disabled=not thema):
-    with st.spinner("Claude ueberlegt sich 3 Formulierungen..."):
+if st.button("Cover-Vorschläge generieren", disabled=not thema):
+    with st.spinner("Claude überlegt sich 3 Formulierungen..."):
         vorschlaege = generate_cover_optionen(thema, kontext=kontext)
         st.session_state.cover_optionen = proofread_cover_optionen(vorschlaege)
     st.session_state.slides_ergebnis = None
@@ -184,9 +189,9 @@ if st.button("Cover-Vorschlaege generieren", disabled=not thema):
     st.session_state.cover_bild_bytes = None
 
 if st.session_state.cover_optionen:
-    st.header("3. Cover-Frage auswaehlen")
+    st.header("3. Cover-Frage auswählen")
     auswahl = st.radio(
-        "Welche Formulierung gefaellt dir am besten?",
+        "Welche Formulierung gefällt dir am besten?",
         st.session_state.cover_optionen,
         format_func=lambda o: f"{o['teil1']} {o['teil2']}",
         key="cover_auswahl",
@@ -212,7 +217,7 @@ if st.session_state.cover_optionen:
     if st.button("Slides & Caption generieren"):
         with st.spinner("Claude schreibt die Slides 2-8, das Fazit und die Caption..."):
             ergebnis = generate_slides_und_caption(thema, cover_frage, kontext=kontext)
-        with st.spinner("Claude prueft Umlaute, Grammatik und fehlende Woerter..."):
+        with st.spinner("Claude prüft Umlaute, Grammatik und fehlende Wörter..."):
             korrigiert = proofread_slides_und_caption(ergebnis, ergebnis["caption"])
         st.session_state.slides_ergebnis = korrigiert
         st.session_state.cover_frage = cover_frage
@@ -337,9 +342,9 @@ if st.session_state.render_ergebnis:
 
         with st.expander("Direkt aufs iPhone speichern (ohne ZIP)"):
             st.caption(
-                "Auf dem iPhone: Bild antippen und gedrueckt halten, dann "
-                "'Zu Fotos hinzufuegen' waehlen - jedes Bild kommt in voller "
-                "Aufloesung (1080x1350px) in deine Fotomediathek. Die Reihenfolge "
+                "Auf dem iPhone: Bild antippen und gedrückt halten, dann "
+                "'Zu Fotos hinzufügen' wählen - jedes Bild kommt in voller "
+                "Auflösung (1080x1350px) in deine Fotomediathek. Die Reihenfolge "
                 "hier ist absichtlich umgekehrt (Slide 9 zuerst, Slide 1 zuletzt), "
                 "damit die neueste (= zuerst in Fotos angezeigte) Aufnahme Slide 1 "
                 "ist - so landen sie beim Hochladen in Instagram richtig sortiert."
@@ -358,10 +363,10 @@ if st.session_state.render_ergebnis:
     st.text_area(
         "Caption (zum Bearbeiten)", st.session_state.slides_ergebnis["caption"], height=200, key="caption_edit"
     )
-    st.caption("Kopieren fuer Instagram:")
+    st.caption("Kopieren für Instagram:")
     copy_button_widget(st.session_state["caption_edit"], label="Caption kopieren")
 
-    st.header("9. Reel-Text (fuer 9:16-Hintergrund)")
+    st.header("9. Reel-Text (für 9:16-Hintergrund)")
     if st.button("Reel-Text erzeugen"):
         with st.spinner("Claude schreibt 6 kurze Reel-Zeilen..."):
             st.session_state.reel_text_lines = generate_reel_text_lines(
@@ -377,7 +382,7 @@ if st.session_state.render_ergebnis:
             key="reel_text_edit",
         )
         st.caption(
-            "Diese Zeilen nacheinander als Text-Einblendungen ueber dem "
+            "Diese Zeilen nacheinander als Text-Einblendungen über dem "
             "Reel-Hintergrund (Schritt 7) platzieren, z.B. in CapCut - jede "
             "Zeile bleibt stehen, der Text baut sich so zeilenweise auf."
         )
@@ -389,7 +394,7 @@ if st.session_state.render_ergebnis:
         )
 
     if not st.session_state.png_paths:
-        st.caption("Erst die 9 PNGs erzeugen (Schritt 7), dann laesst sich der Post speichern.")
+        st.caption("Erst die 9 PNGs erzeugen (Schritt 7), dann lässt sich der Post speichern.")
     if st.button("Als fertigen Post in der Historie speichern", disabled=not st.session_state.png_paths):
         r = st.session_state.recherche
         quelle = f"{r['autoren']} ({r['jahr']})" if r else None
