@@ -61,7 +61,12 @@ POSTS_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file
 def slugify(text):
     text = text.lower().strip()
     text = re.sub(r"[^a-z0-9]+", "-", text)
-    return text.strip("-")
+    text = text.strip("-")
+    # Auf eine vernuenftige Laenge kappen - bei einem sehr langen Thema
+    # (z.B. komplett eingefuegter Studientitel) wuerde der volle Text sonst
+    # in Ordner-/Dateinamen landen und den Windows-Pfadlimit (~260 Zeichen)
+    # sprengen ("No such file or directory" beim Schreiben, siehe Bugreport).
+    return text[:50].strip("-")
 
 
 def recherche_als_kontext(r):
