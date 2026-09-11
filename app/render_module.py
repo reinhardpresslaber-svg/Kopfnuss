@@ -131,12 +131,16 @@ def build_cover_slide_foto(cover_frage, foto_b64):
     statt der transparenten Icon-Grafik - klare, harte Kante zwischen Foto
     und Text (kein Verlauf), Text darunter auf normalem Creme-Hintergrund
     (gleiche Schrift-/Farbregeln wie bei build_cover_slide(), daher hier
-    KEINE Blobs/Deko noetig). Das Foto ist absolut positioniert (wie der
-    Bild-Layer bei build_cover_slide(), top:-90px/left:-84px kompensieren
-    das Padding von .frame und bringen es exakt an die echte Kante) - daher
-    bekommt content-mid ein manuelles margin-top, um direkt darunter zu
-    beginnen; ein margin-bottom sorgt zusaetzlich fuer garantierten Abstand
-    zur Fusszeile, auch bei langen Headlines.
+    KEINE Blobs/Deko noetig). Das Foto ist absolut positioniert mit
+    top:0/left:0 (reicht bis zur echten Kante von .frame, unabhaengig vom
+    Padding) - daher bekommt content-mid ein manuelles margin-top, um direkt
+    darunter zu beginnen; ein margin-bottom sorgt zusaetzlich fuer
+    garantierten Abstand zur Fusszeile. Die Headline ist hier bewusst kleiner
+    als bei build_cover_slide() (78px statt 88px, wie .headline.big), weil
+    das fixe margin-top hier - anders als beim flexibel zentrierten
+    Icon-Cover - festen Platz belegt und bei langen, mehrzeiligen Headlines
+    sonst die Fusszeile aus dem Rahmen drueckt (siehe Bugreport "unten fehlt
+    der Footer").
     """
     return {
         "eyebrow": "1/9",
@@ -144,7 +148,7 @@ def build_cover_slide_foto(cover_frage, foto_b64):
         <img src="data:image/png;base64,{foto_b64}" alt="" style="position:absolute; top:0; left:0; width:1080px; height:540px; object-fit:cover; z-index:0; pointer-events:none;"/>
         <div class="content-mid" style="align-items:flex-start; justify-content:flex-start; margin-top:420px; margin-bottom:50px;">
           <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="width:160px; margin-top:34px;"/>
-          <div class="headline" style="font-size:88px; line-height:1.02; margin-top:34px;">{cover_frage}</div>
+          <div class="headline" style="font-size:78px; line-height:1.05; margin-top:34px;">{cover_frage}</div>
         </div>
         ''',
         "footer": "@KopfnussPsychologie",
