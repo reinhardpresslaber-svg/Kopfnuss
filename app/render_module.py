@@ -153,7 +153,7 @@ def build_cover_slide_foto(cover_frage, foto_b64):
         "body": f'''
         <img src="data:image/png;base64,{foto_b64}" alt="" style="position:absolute; top:0; left:0; width:1080px; height:660px; object-fit:cover; z-index:0; pointer-events:none;"/>
         <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="position:absolute; top:130px; left:84px; width:130px; z-index:2; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); pointer-events:none;"/>
-        <div class="content-mid" style="align-items:flex-start; justify-content:flex-start; margin-top:540px; margin-bottom:50px;">
+        <div class="content-mid" style="align-items:flex-start; justify-content:center; margin-top:540px; margin-bottom:50px;">
           <div class="headline" style="font-size:78px; line-height:1.05; margin-top:0;">{cover_frage}</div>
         </div>
         ''',
