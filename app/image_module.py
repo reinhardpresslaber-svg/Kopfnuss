@@ -211,7 +211,7 @@ Stil:
 - Modernes, kunstvolles Editorial-/Fine-Art-Licht: kraeftiges, gerichtetes Licht mit klaren Kontrasten/Schatten (z.B. hartes Seitenlicht oder starkes Fensterlicht) statt diffusem, flachem "Lifestyle"-Licht
 - Reduzierte, bewusst gewaehlte Farbpalette - gerne mit Anklaengen an Terrakotta (#C15A2E), Salbeigruen (#8FBFA0) oder Creme (#FBF6EF) in Kleidung/Umgebung, ruhig und hochwertig statt bunt/beliebig
 - Fotorealistisch, KEINE Illustration, KEIN 3D-Render, KEIN Comic-/Cartoon-Stil
-- UNBEDINGT BEACHTEN: Das Bild darf UNTER KEINEN UMSTAENDEN Text, Buchstaben, Woerter oder Logos enthalten
+- UNBEDINGT BEACHTEN: Das Bild darf UNTER KEINEN UMSTAENDEN laufenden Text, Woerter, Saetze oder Logos enthalten (bei laengeren KI-generierten Texten sieht das schnell verstuemmelt/kaputt aus). Ausnahme: EINZELNE, kurze Buchstaben oder Zahlen (z.B. "A"/"B" auf zwei Requisiten, eine "3" auf einem Schild) sind erlaubt, aber NUR wenn sie inhaltlich direkt zur Storytelling-Idee gehoeren (siehe erster Motiv-Punkt) und klar lesbar bleiben - keine laengeren Woerter oder Phrasen
 - UNBEDINGT BEACHTEN: Das Foto muss randlos/vollflaechig bis zum Bildrand gehen - KEIN weisser/cremefarbener Rahmen, KEIN Passepartout, KEIN Rand, KEINE Bordüre um das Foto herum, auch nicht als "Fine-Art-Print"-Stilmittel. Die Szene fuellt das gesamte Bild bis zu allen vier Kanten aus.
 
 Format: Querformat-aehnlicher Bildausschnitt (wird oben auf der Seite als breiter Streifen genutzt, randlos/vollflaechig). Das Hauptmotiv mittig positionieren, mit ausreichend Luft zu allen vier Bildraendern innerhalb der Szene selbst (nichts wird angeschnitten) - aber OHNE einen umlaufenden Rahmen/Rand als eigenes Bildelement.
