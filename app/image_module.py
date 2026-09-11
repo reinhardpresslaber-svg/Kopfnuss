@@ -193,31 +193,35 @@ def generate_cover_bild(cover_frage):
     raise RuntimeError("Gemini hat kein Bild zurueckgegeben.")
 
 
-PROMPT_TEMPLATE_FOTO = """Erstelle ein realistisches, warmes Foto im Stil eines hochwertigen Editorial-/Lifestyle-Shootings (KEIN generisches, kuenstlich wirkendes Corporate-Stockfoto) fuer die Titelseite eines Instagram-Posts zum Thema Psychologie/Coaching. Das Foto wird als vollflaechiges Hintergrundbild verwendet (kein Freistellen noetig).
+PROMPT_TEMPLATE_FOTO = """Erstelle ein modernes, kunstvolles Foto im Stil eines zeitgenoessischen Editorial-/Fine-Art-Portraitshootings (z.B. wie ein aktuelles Magazin-Cover oder eine Galerie-Fotografie - KEIN generisches, beliebiges Corporate-/Lifestyle-Stockfoto) fuer die Titelseite eines Instagram-Posts zum Thema Psychologie/Coaching. Das Foto wird als fest umrissener Bildblock am oberen Rand der Seite verwendet (kein Freistellen noetig, kein Verlauf - darunter folgt eine harte Kante zu einer einfarbigen Flaeche mit Text).
 
 Zentrale Frage/Thema des Posts: "{cover_frage}"
 
 Motiv:
 - Zeige 1-2 sympathische, authentisch wirkende Menschen (natuerliche Ausstrahlung, KEIN aufgesetztes Stock-Foto-Laecheln), deren Situation oder Gesichtsausdruck das Thema emotional einfaengt und symbolisch darstellt
-- Divers und alltagsnah, keine ueberzeichnete/gestellte Pose
-- Halbnahe bis mittlere Einstellung (Kopf bis Oberkoerper/Hueften sichtbar) - KEIN extremer Close-up. Die Personen muessen VOLLSTAENDIG und mit spuerbarem Rand/Luft zu allen Bildkanten im Bild stehen - Koepfe/Gesichter/Koerper duerfen NICHT am Bildrand angeschnitten sein oder zu nah rangezoomt wirken. Grosszuegiger Rahmen, damit beim spaeteren Zuschneiden auf 4:5 nichts Wichtiges verloren geht
+- Bewusste, kuenstlerische Bildkomposition statt beliebigem Alltagsschnappschuss - praezise Posen/Blickrichtung, klare Bildidee
+- Halbnahe bis mittlere Einstellung (Kopf bis Oberkoerper/Hueften sichtbar) - KEIN extremer Close-up. Die Personen muessen VOLLSTAENDIG und mit spuerbarem Rand/Luft zu allen Bildkanten im Bild stehen - Koepfe/Gesichter/Koerper duerfen NICHT am Bildrand angeschnitten sein oder zu nah rangezoomt wirken. Grosszuegiger Rahmen, damit beim spaeteren Zuschneiden nichts Wichtiges verloren geht
 
 Stil:
-- Natuerliches, weiches Licht (z.B. Fensterlicht), warme, ruhige Farbstimmung - gerne mit Anklaengen an Terrakotta (#C15A2E), Salbeigruen (#8FBFA0) oder Creme (#FBF6EF) in Kleidung/Umgebung, aber nicht aufgesetzt/gefiltert wirkend
+- Modernes, kunstvolles Editorial-/Fine-Art-Licht: kraeftiges, gerichtetes Licht mit klaren Kontrasten/Schatten (z.B. hartes Seitenlicht oder starkes Fensterlicht) statt diffusem, flachem "Lifestyle"-Licht
+- Reduzierte, bewusst gewaehlte Farbpalette - gerne mit Anklaengen an Terrakotta (#C15A2E), Salbeigruen (#8FBFA0) oder Creme (#FBF6EF) in Kleidung/Umgebung, ruhig und hochwertig statt bunt/beliebig
 - Fotorealistisch, KEINE Illustration, KEIN 3D-Render, KEIN Comic-/Cartoon-Stil
 - UNBEDINGT BEACHTEN: Das Bild darf UNTER KEINEN UMSTAENDEN Text, Buchstaben, Woerter oder Logos enthalten
 
-Format: Hochformat 4:5. Das Hauptmotiv mittig bis leicht oberhalb der Mitte positionieren, mit ausreichend Luft zu allen vier Bildraendern (nichts wird angeschnitten) - das untere Drittel des Bildes ruhiger und weniger detailreich halten, da dort spaeter Text ueber einen Verlauf eingeblendet wird.
+Format: Querformat-aehnlicher Bildausschnitt (wird oben auf der Seite als breiter Streifen genutzt). Das Hauptmotiv mittig positionieren, mit ausreichend Luft zu allen vier Bildraendern (nichts wird angeschnitten).
 """
 
 
 def generate_cover_foto(cover_frage):
     """
-    Generiert ein realistisches, vollflaechiges Foto-Motiv mit Menschen fuer
-    Slide 1 - Alternative zur Icon-Illustration (generate_cover_bild()), fuer
-    ein emotionaleres, ansprechenderes Cover. Kein Freistellen/Chroma-Key
-    noetig, da das Foto als opakes Hintergrundbild (object-fit:cover)
-    verwendet wird. Gibt PNG-Bytes zurueck.
+    Generiert ein realistisches Foto-Motiv mit Menschen fuer Slide 1 -
+    Alternative zur Icon-Illustration (generate_cover_bild()), fuer ein
+    emotionaleres, ansprechenderes Cover. Wird als querformatiger Streifen
+    (1080x620px, siehe render_module.build_cover_slide_foto()) am oberen
+    Slide-Rand verwendet, daher hier im Breitformat "16:9" generiert statt
+    im Hochformat wie beim Icon-Motiv - object-fit:cover schneidet sonst
+    zu viel vom Hochformat-Bild weg. Kein Freistellen/Chroma-Key noetig,
+    da das Foto opak verwendet wird. Gibt PNG-Bytes zurueck.
     """
     prompt = PROMPT_TEMPLATE_FOTO.format(cover_frage=cover_frage)
     client = _client()
@@ -226,7 +230,7 @@ def generate_cover_foto(cover_frage):
         contents=prompt,
         config=types.GenerateContentConfig(
             response_modalities=["IMAGE"],
-            image_config=types.ImageConfig(aspect_ratio="3:4"),
+            image_config=types.ImageConfig(aspect_ratio="16:9"),
         ),
     )
 
