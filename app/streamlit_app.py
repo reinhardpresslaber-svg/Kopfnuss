@@ -134,7 +134,7 @@ for key, default in [
     ("render_ergebnis", None),
     ("png_paths", None),
     ("cover_bild_bytes", None),
-    ("cover_bild_stil", "icon"),
+    ("cover_bild_stil", "foto"),
     ("reel_text_lines", None),
     ("studien_vorschlaege", None),
     ("reel_cover_path", None),
@@ -216,7 +216,7 @@ if st.session_state.cover_optionen:
     st.header("4. Cover-Bild")
     bild_stil_auswahl = st.radio(
         "Bildstil",
-        ["icon", "foto"],
+        ["foto", "icon"],
         format_func=lambda x: {"icon": "Icon-Illustration", "foto": "Foto mit Menschen"}[x],
         horizontal=True,
         key="bild_stil_auswahl",
