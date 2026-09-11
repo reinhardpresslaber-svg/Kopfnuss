@@ -117,7 +117,11 @@ COVER_TOOL = {
                     "properties": {
                         "teil1": {
                             "type": "string",
-                            "description": "Erster Teil der Cover-Frage (Aufbau/Kontext).",
+                            "description": (
+                                "Erster Teil der Cover-Frage (Aufbau/Kontext). Kurz halten "
+                                "(max. ca. 8-10 Woerter) - ein knapper Hook stoppt den Scroll "
+                                "besser als ein langer, erklaerender Satz."
+                            ),
                         },
                         "teil2": {
                             "type": "string",
@@ -222,6 +226,13 @@ def generate_cover_optionen(thema, kontext=""):
         "'ganz kurz'). Bleib dabei seriös und fachlich fundiert (Diplom-"
         "Psychologe als Absender) - kein reisserisches Clickbait, sondern "
         "neugierig machende Praezision.\n\n"
+        "WICHTIG - Kuerze: Ein kurzer, knackiger Hook stoppt den Scroll "
+        "zuverlaessiger als ein langer, erklaerender Satz (der wird auf dem "
+        "kleinen Handy-Bildschirm in der Timeline eh nur ueberflogen). "
+        "Fasse dich daher bewusst kurz: teil1 max. ca. 8-10 Woerter, teil2 "
+        "max. ca. 5-6 Woerter, beide Teile zusammen im Idealfall unter 15 "
+        "Woertern und auf einen Blick erfassbar. Lieber eine praegnante "
+        "Zuspitzung als ein vollstaendiger, mehrteiliger Satz.\n\n"
         "Jeder Vorschlag besteht aus teil1 (Aufbau/Kontext) und teil2 (die "
         "kurze Pointe/der Clou zum Schluss, z.B. die Zahl, die Frage oder "
         "die Ueberraschung) - teil2 wird auf der Slide farblich hervorgehoben, "
