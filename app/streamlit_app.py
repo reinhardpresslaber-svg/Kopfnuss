@@ -236,7 +236,7 @@ if st.session_state.cover_optionen:
         preview_html = render_cover_preview_html(
             cover_frage_html, bild_b64=bild_b64_preview, theme=farbthema, bild_stil=st.session_state.cover_bild_stil
         )
-        st.components.v1.html(preview_html, height=460)
+        st.components.v1.html(preview_html, height=470)
 
     if st.button("Slides & Caption generieren"):
         with st.spinner("Claude schreibt die Slides 2-8, das Fazit und die Caption..."):
@@ -350,7 +350,7 @@ if st.session_state.render_ergebnis:
             )
 
     if st.session_state.png_paths:
-        st.success(f"{len(st.session_state.png_paths)} PNGs erzeugt (jeweils 1080x1350px).")
+        st.success(f"{len(st.session_state.png_paths)} PNGs erzeugt (jeweils 1080x1440px).")
 
         aktuelle_caption = st.session_state.get("caption_edit", st.session_state.slides_ergebnis["caption"])
         zip_buffer = io.BytesIO()
@@ -374,7 +374,7 @@ if st.session_state.render_ergebnis:
             st.caption(
                 "Auf dem iPhone: Bild antippen und gedrückt halten, dann "
                 "'Zu Fotos hinzufügen' wählen - jedes Bild kommt in voller "
-                "Auflösung (1080x1350px) in deine Fotomediathek. Die Reihenfolge "
+                "Auflösung (1080x1440px) in deine Fotomediathek. Die Reihenfolge "
                 "hier ist absichtlich umgekehrt (Slide 9 zuerst, Slide 1 zuletzt), "
                 "damit die neueste (= zuerst in Fotos angezeigte) Aufnahme Slide 1 "
                 "ist - so landen sie beim Hochladen in Instagram richtig sortiert."

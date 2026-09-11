@@ -106,7 +106,7 @@ def build_cover_slide(cover_frage, bild_b64=None):
     if bild_b64:
         bild_layer = (
             f'<img src="data:image/png;base64,{bild_b64}" alt="" '
-            f'style="position:absolute; top:-90px; left:-84px; width:1080px; height:1350px; '
+            f'style="position:absolute; top:-90px; left:-84px; width:1080px; height:1440px; '
             f'object-fit:contain; opacity:0.3; z-index:1; pointer-events:none;"/>'
         )
     return {
@@ -142,7 +142,7 @@ def build_cover_slide_foto(cover_frage, foto_b64):
         "eyebrow": "1/9",
         "body": f'''
         <img src="data:image/png;base64,{foto_b64}" alt="" style="position:absolute; top:0; left:0; width:1080px; height:540px; object-fit:cover; z-index:0; pointer-events:none;"/>
-        <div class="content-mid" style="align-items:flex-start; justify-content:flex-start; margin-top:420px; margin-bottom:24px;">
+        <div class="content-mid" style="align-items:flex-start; justify-content:flex-start; margin-top:420px; margin-bottom:50px;">
           <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="width:160px; margin-top:34px;"/>
           <div class="headline" style="font-size:88px; line-height:1.02; margin-top:34px;">{cover_frage}</div>
         </div>
@@ -251,7 +251,7 @@ def render_carousel(slides, topic_slug, topic_title, theme="klassisch", output_d
     <button onclick="downloadCurrent()">Slide als PNG</button>
     <button class="primary" onclick="downloadAll()">Alle 9 als PNG</button>
   </div>
-  <p class="hint">Export erzeugt 1080&times;1350 px PNGs &mdash; passend f&uuml;r Instagram-Karussells (4:5).</p>
+  <p class="hint">Export erzeugt 1080&times;1440 px PNGs &mdash; passend f&uuml;r Instagram-Karussells (3:4).</p>
 </div>
 
 <script>
@@ -291,7 +291,7 @@ def render_carousel(slides, topic_slug, topic_title, theme="klassisch", output_d
       clone.style.top = '0';
       applyBg(clone);
       document.body.appendChild(clone);
-      html2canvas(clone, {{ width: 1080, height: 1350, scale: 1, useCORS: true }}).then(canvas => {{
+      html2canvas(clone, {{ width: 1080, height: 1440, scale: 1, useCORS: true }}).then(canvas => {{
         document.body.removeChild(clone);
         resolve(canvas);
       }});
@@ -341,7 +341,7 @@ def render_carousel(slides, topic_slug, topic_title, theme="klassisch", output_d
 {style}
 {green_override}
 html,body{{ margin:0; padding:0; }}
-.slide{{ display:block !important; transform:none !important; width:1080px !important; height:1350px !important; background:{bg} !important; }}
+.slide{{ display:block !important; transform:none !important; width:1080px !important; height:1440px !important; background:{bg} !important; }}
 </style>
 </head>
 <body>
@@ -404,7 +404,7 @@ def export_pngs(slide_html_paths):
     """
     Wandelt die Export-HTML-Dateien einer Slide-Liste (aus render_carousel(),
     "slide_htmls") in echte PNG-Dateien um - per Playwright (ein unsichtbarer
-    Chrome-Browser macht einen 1080x1350px-Screenshot jeder Slide).
+    Chrome-Browser macht einen 1080x1440px-Screenshot jeder Slide).
 
     Gibt die Liste der erzeugten PNG-Pfade zurueck (gleicher Ordner, gleicher
     Dateiname, nur mit .png statt .html).
@@ -416,7 +416,7 @@ def export_pngs(slide_html_paths):
     png_paths = []
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        page = browser.new_page(viewport={"width": 1080, "height": 1350})
+        page = browser.new_page(viewport={"width": 1080, "height": 1440})
         for html_path in slide_html_paths:
             page.goto(Path(html_path).resolve().as_uri())
             page.wait_for_load_state("networkidle")
@@ -438,7 +438,7 @@ def build_reel_cover_html(bild_b64=None, theme="klassisch"):
     if bild_b64:
         bild_layer = (
             f'<img src="data:image/png;base64,{bild_b64}" alt="" '
-            f'style="position:absolute; top:285px; left:0; width:1080px; height:1350px; '
+            f'style="position:absolute; top:240px; left:0; width:1080px; height:1440px; '
             f'object-fit:contain; opacity:0.3; z-index:1; pointer-events:none;"/>'
         )
     blobs = BLOBS[0]

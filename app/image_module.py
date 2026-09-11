@@ -45,7 +45,7 @@ Farbpalette (NUR diese Farben verwenden, dabei kraeftig/satt und praesent einset
 Hintergrund: WICHTIG - der komplette Hintergrund muss eine einzige, absolut gleichmaessige Flaeche in genau dieser Farbe sein: RGB(255, 0, 255) reines Magenta/Pink, ohne jede Textur, Farbverlauf oder Schatten (wird danach automatisch entfernt).
 
 Komposition:
-- Format 4:5 Hochformat (1080x1350px)
+- Format 3:4 Hochformat (1080x1440px)
 - WICHTIG: Der Schwerpunkt/die Hauptmasse der Symbole liegt klar in der RECHTEN Bildhaelfte. Im linken oberen Bereich (dort sitzt spaeter ein Logo, ca. bei 15-35% der Bildbreite/-hoehe) duerfen bestenfalls einzelne duenne Linien durchlaufen, aber keine dichten/dominanten Formen - dieser Bereich soll sichtbar leerer wirken als die rechte Seite.
 - Weiter unten (dort wo die Ueberschrift als Text liegt) duerfen die Symbole ueber die ganze Breite verteilt sein, da die Linien duenn und blass genug sind, dass der Text trotzdem gut lesbar bleibt.
 - Nur die direkten Bildraender (ca. 60px) bleiben komplett frei.
@@ -128,7 +128,7 @@ def _fit_to_canvas(img, width, height, x_bias=0.5):
     """
     Skaliert ein Bild so, dass es komplett hineinpasst (nichts wird
     abgeschnitten), und platziert es auf einer transparenten Leinwand
-    der Zielgroesse (1080x1350, passend zur vollen Slide-Flaeche).
+    der Zielgroesse (1080x1440, passend zur vollen Slide-Flaeche).
     x_bias verschiebt die horizontale Position leicht nach rechts
     (0.5 = mittig, 1.0 = ganz rechts), damit der Bildschwerpunkt zur
     rechtslastigen Komposition passt statt streng zentriert zu wirken.
@@ -183,7 +183,7 @@ def generate_cover_bild(cover_frage):
             key_color = _sample_corner_color(img)
             img = _remove_chroma_key(img, key_color=key_color)
             img = _trim_transparent(img)
-            img = _fit_to_canvas(img, 1080, 1350)
+            img = _fit_to_canvas(img, 1080, 1440)
             img = _clear_left_zone(img)
             img = _clean_resize_haze(img)
             buf = io.BytesIO()
