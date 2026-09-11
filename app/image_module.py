@@ -200,6 +200,7 @@ WICHTIGSTE REGEL, UNBEDINGT EINHALTEN: Das Bild selbst ist ein reines, digitales
 Zentrale Frage/Thema des Posts: "{cover_frage}"
 
 Motiv:
+- WICHTIGSTES ZIEL - Storytelling: Das Bild soll die Frage/das Thema oben ("{cover_frage}") konkret ERZAEHLEN, nicht nur allgemein illustrieren. Ueberlege dir eine nachvollziehbare, spezifische Alltagsszene, die genau diese Situation zeigt (passende Handlung, Requisiten, Umgebung, Interaktion zwischen den Personen - was tun sie gerade, warum, was ist der Ausloeser?). Wer das Bild sieht, soll auch ohne den Text zu lesen erahnen koennen, worum es im Post geht - keine austauschbare, allgemeine "nachdenkliche Person"-Pose ohne erkennbaren inhaltlichen Bezug zum Thema
 - Zeige 1-2 sympathische, authentisch wirkende Menschen (natuerliche Ausstrahlung, KEIN aufgesetztes Stock-Foto-Laecheln), deren Situation oder Gesichtsausdruck das Thema emotional einfaengt und symbolisch darstellt
 - Bewusste, kuenstlerische Bildkomposition statt beliebigem Alltagsschnappschuss - praezise Posen/Blickrichtung, klare Bildidee
 - Halbnahe bis mittlere Einstellung (Kopf bis Oberkoerper/Hueften sichtbar) - KEIN extremer Close-up. Die Personen muessen VOLLSTAENDIG und mit spuerbarem Rand/Luft zu allen Bildkanten im Bild stehen - Koepfe/Gesichter/Koerper duerfen NICHT am Bildrand angeschnitten sein oder zu nah rangezoomt wirken. Grosszuegiger Rahmen, damit beim spaeteren Zuschneiden nichts Wichtiges verloren geht
