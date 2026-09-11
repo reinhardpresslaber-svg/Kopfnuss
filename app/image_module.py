@@ -195,6 +195,8 @@ def generate_cover_bild(cover_frage):
 
 PROMPT_TEMPLATE_FOTO = """Erstelle ein modernes, kunstvolles Foto im Stil eines zeitgenoessischen Editorial-/Fine-Art-Portraitshootings (z.B. wie ein aktuelles Magazin-Cover oder eine Galerie-Fotografie - KEIN generisches, beliebiges Corporate-/Lifestyle-Stockfoto) fuer die Titelseite eines Instagram-Posts zum Thema Psychologie/Coaching. Das Foto wird als fest umrissener Bildblock am oberen Rand der Seite verwendet (kein Freistellen noetig, kein Verlauf - darunter folgt eine harte Kante zu einer einfarbigen Flaeche mit Text).
 
+WICHTIGSTE REGEL, UNBEDINGT EINHALTEN: Das Bild selbst ist ein reines, digitales Foto OHNE jeden Rahmen - KEIN weisser oder cremefarbener Rand, KEIN Passepartout, KEINE Bordüre, KEINE Vignette, KEIN sichtbarer Fotoabzug/Print-Look mit Papierrand um die Szene herum. Auch die "Editorial-/Fine-Art"-Anmutung bezieht sich NUR auf Licht und Bildsprache, NICHT auf einen physischen Print oder Rahmen als Bildelement. Die Aufnahme fuellt die gesamte Bildflaeche bis zum allerletzten Pixel an allen vier Kanten aus.
+
 Zentrale Frage/Thema des Posts: "{cover_frage}"
 
 Motiv:
