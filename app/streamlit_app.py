@@ -37,7 +37,7 @@ from render_module import (
     parse_fazit_body,
     build_fazit_body,
 )
-from image_module import generate_cover_bild
+from image_module import generate_cover_bild, generate_cover_foto
 
 st.set_page_config(page_title="Kopfnuss Post-Generator", page_icon="🥜", layout="centered")
 st.title("🥜 Kopfnuss Post-Generator")
@@ -134,6 +134,7 @@ for key, default in [
     ("render_ergebnis", None),
     ("png_paths", None),
     ("cover_bild_bytes", None),
+    ("cover_bild_stil", "icon"),
     ("reel_text_lines", None),
     ("studien_vorschlaege", None),
     ("reel_cover_path", None),
@@ -213,14 +214,28 @@ if st.session_state.cover_optionen:
     cover_frage_html = f'{cover_teil1}<br/><span style="color:var(--rust);">{cover_teil2}</span>'
 
     st.header("4. Cover-Bild")
+    bild_stil_auswahl = st.radio(
+        "Bildstil",
+        ["icon", "foto"],
+        format_func=lambda x: {"icon": "Icon-Illustration", "foto": "Foto mit Menschen"}[x],
+        horizontal=True,
+        key="bild_stil_auswahl",
+    )
     bild_button_label = "Neu generieren" if st.session_state.cover_bild_bytes else "Cover-Bild generieren"
     if st.button(bild_button_label):
-        with st.spinner("Gemini erzeugt ein passendes Motiv..."):
-            st.session_state.cover_bild_bytes = generate_cover_bild(cover_frage)
+        if bild_stil_auswahl == "foto":
+            with st.spinner("Gemini erzeugt ein Foto mit Menschen..."):
+                st.session_state.cover_bild_bytes = generate_cover_foto(cover_frage)
+        else:
+            with st.spinner("Gemini erzeugt ein passendes Motiv..."):
+                st.session_state.cover_bild_bytes = generate_cover_bild(cover_frage)
+        st.session_state.cover_bild_stil = bild_stil_auswahl
 
     if st.session_state.cover_bild_bytes:
         bild_b64_preview = base64.b64encode(st.session_state.cover_bild_bytes).decode("ascii")
-        preview_html = render_cover_preview_html(cover_frage_html, bild_b64=bild_b64_preview, theme=farbthema)
+        preview_html = render_cover_preview_html(
+            cover_frage_html, bild_b64=bild_b64_preview, theme=farbthema, bild_stil=st.session_state.cover_bild_stil
+        )
         st.components.v1.html(preview_html, height=460)
 
     if st.button("Slides & Caption generieren"):
@@ -296,7 +311,13 @@ if st.session_state.cover_optionen:
                     if st.session_state.cover_bild_bytes
                     else None
                 )
-                slides = assemble_slides(cover_frage_html, slides_2_bis_8, fazit_body, bild_b64=bild_b64)
+                slides = assemble_slides(
+                    cover_frage_html,
+                    slides_2_bis_8,
+                    fazit_body,
+                    bild_b64=bild_b64,
+                    bild_stil=st.session_state.cover_bild_stil,
+                )
                 slug = slugify(thema)
                 render_ergebnis = render_carousel(
                     slides=slides,

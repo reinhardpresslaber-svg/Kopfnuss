@@ -191,3 +191,50 @@ def generate_cover_bild(cover_frage):
             return buf.getvalue()
 
     raise RuntimeError("Gemini hat kein Bild zurueckgegeben.")
+
+
+PROMPT_TEMPLATE_FOTO = """Erstelle ein realistisches, warmes Foto im Stil eines hochwertigen Editorial-/Lifestyle-Shootings (KEIN generisches, kuenstlich wirkendes Corporate-Stockfoto) fuer die Titelseite eines Instagram-Posts zum Thema Psychologie/Coaching. Das Foto wird als vollflaechiges Hintergrundbild verwendet (kein Freistellen noetig).
+
+Zentrale Frage/Thema des Posts: "{cover_frage}"
+
+Motiv:
+- Zeige 1-2 sympathische, authentisch wirkende Menschen (natuerliche Ausstrahlung, KEIN aufgesetztes Stock-Foto-Laecheln), deren Situation oder Gesichtsausdruck das Thema emotional einfaengt und symbolisch darstellt
+- Divers und alltagsnah, keine ueberzeichnete/gestellte Pose
+- Nahaufnahme oder mittlere Einstellung, Fokus auf Gesicht/Ausdruck bzw. Interaktion zwischen den Personen
+
+Stil:
+- Natuerliches, weiches Licht (z.B. Fensterlicht), warme, ruhige Farbstimmung - gerne mit Anklaengen an Terrakotta (#C15A2E), Salbeigruen (#8FBFA0) oder Creme (#FBF6EF) in Kleidung/Umgebung, aber nicht aufgesetzt/gefiltert wirkend
+- Fotorealistisch, KEINE Illustration, KEIN 3D-Render, KEIN Comic-/Cartoon-Stil
+- UNBEDINGT BEACHTEN: Das Bild darf UNTER KEINEN UMSTAENDEN Text, Buchstaben, Woerter oder Logos enthalten
+
+Format: Hochformat 4:5. Das Hauptmotiv mittig bis leicht oberhalb der Mitte positionieren - das untere Drittel des Bildes ruhiger und weniger detailreich halten, da dort spaeter Text ueber einen Verlauf eingeblendet wird.
+"""
+
+
+def generate_cover_foto(cover_frage):
+    """
+    Generiert ein realistisches, vollflaechiges Foto-Motiv mit Menschen fuer
+    Slide 1 - Alternative zur Icon-Illustration (generate_cover_bild()), fuer
+    ein emotionaleres, ansprechenderes Cover. Kein Freistellen/Chroma-Key
+    noetig, da das Foto als opakes Hintergrundbild (object-fit:cover)
+    verwendet wird. Gibt PNG-Bytes zurueck.
+    """
+    prompt = PROMPT_TEMPLATE_FOTO.format(cover_frage=cover_frage)
+    client = _client()
+    response = client.models.generate_content(
+        model=MODEL,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            response_modalities=["IMAGE"],
+            image_config=types.ImageConfig(aspect_ratio="3:4"),
+        ),
+    )
+
+    for part in response.candidates[0].content.parts:
+        if part.inline_data:
+            img = Image.open(io.BytesIO(part.inline_data.data)).convert("RGB")
+            buf = io.BytesIO()
+            img.save(buf, format="PNG")
+            return buf.getvalue()
+
+    raise RuntimeError("Gemini hat kein Bild zurueckgegeben.")

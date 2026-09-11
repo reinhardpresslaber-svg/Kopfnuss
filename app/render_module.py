@@ -123,6 +123,29 @@ def build_cover_slide(cover_frage, bild_b64=None):
     }
 
 
+def build_cover_slide_foto(cover_frage, foto_b64):
+    """
+    Baut Slide 1 (Cover) als Foto-Variante: ein realistisches, vollflaechiges
+    Foto (siehe image_module.generate_cover_foto()) statt der transparenten
+    Icon-Grafik - das Foto deckt die ganze Slide ab, ein Verlauf zu Creme
+    im unteren Bereich sorgt fuer Text-Lesbarkeit (gleiche Schrift-/Farbregeln
+    wie bei build_cover_slide(), daher hier KEINE Blobs/Deko noetig).
+    """
+    return {
+        "eyebrow": "1/9",
+        "body": f'''
+        <img src="data:image/png;base64,{foto_b64}" alt="" style="position:absolute; top:0; left:0; width:1080px; height:1350px; object-fit:cover; z-index:0; pointer-events:none;"/>
+        <div style="position:absolute; top:0; left:0; width:1080px; height:1350px; background:linear-gradient(to bottom, rgba(251,246,239,0) 0%, rgba(251,246,239,0.15) 32%, rgba(251,246,239,0.92) 50%, rgba(251,246,239,1) 60%); z-index:1; pointer-events:none;"></div>
+        <div class="content-mid" style="align-items:flex-start; justify-content:flex-end;">
+          <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="width:160px;"/>
+          <div class="headline" style="font-size:88px; line-height:1.02; margin-top:34px;">{cover_frage}</div>
+        </div>
+        ''',
+        "footer": "@KopfnussPsychologie",
+        "footer_extra": '<div class="swipe-hint">Wische weiter &rarr;</div>',
+    }
+
+
 def build_cta_slide(fazit_html):
     """Baut Slide 9 (Fazit + CTA): fazit_html ist der freie Fazit-Text, Rest (Icons/Claim) ist fest."""
     return {
@@ -337,14 +360,18 @@ html,body{{ margin:0; padding:0; }}
     }
 
 
-def render_cover_preview_html(cover_frage, bild_b64=None, theme="klassisch"):
+def render_cover_preview_html(cover_frage, bild_b64=None, theme="klassisch", bild_stil="icon"):
     """
     Baut eine kompakte Vorschau NUR von Slide 1 (Cover) - z.B. um ein
     generiertes Cover-Bild direkt im Zusammenspiel mit Logo/Ueberschrift
-    zu pruefen, ohne gleich alle 9 Slides generieren zu muessen.
+    zu pruefen, ohne gleich alle 9 Slides generieren zu muessen. bild_stil
+    waehlt wie bei assemble_slides() zwischen "icon" und "foto".
     """
     green_override = THEMES[theme]
-    slide = build_cover_slide(cover_frage, bild_b64=bild_b64)
+    if bild_stil == "foto" and bild_b64:
+        slide = build_cover_slide_foto(cover_frage, bild_b64)
+    else:
+        slide = build_cover_slide(cover_frage, bild_b64=bild_b64)
     slide_html = make_slide_div(0, slide, active=True)
     return f"""<!DOCTYPE html>
 <html lang="de">
