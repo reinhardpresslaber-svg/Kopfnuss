@@ -142,17 +142,28 @@ def build_cover_slide_foto(cover_frage, foto_b64):
     sonst die Fusszeile aus dem Rahmen drueckt (siehe Bugreport "unten fehlt
     der Footer"). Das Logo liegt hier (anders als bei build_cover_slide())
     nicht ueber dem Text, sondern selbst absolut positioniert oben links auf
-    dem Foto (mit drop-shadow fuer Lesbarkeit auf wechselnden Fotohintergruenden,
-    knapp unterhalb der "1/9"-Eyebrow, damit sich beide nicht ueberlappen) -
-    das spart den Whitespace, den das Logo vorher ueber der Ueberschrift
-    belegt hat, und der wird stattdessen dem Foto zugeschlagen (Foto jetzt
-    hoeher).
+    dem Foto (mit drop-shadow fuer Lesbarkeit auf wechselnden Fotohintergruenden).
+    Die "1/9"-Seitenzahl wandert dafuer auf die rechte Seite (dort ist beim
+    Cover-Slide sonst nichts - das "nutmark"-Icon, das auf den anderen Slides
+    oben rechts sitzt, wird nur fuer i!=0 gerendert, siehe make_slide_div()),
+    damit sich Logo und Seitenzahl nicht mehr gedraengt in derselben Ecke
+    stapeln (Feedback: "gedraengte Logo und Paginierungs Platzierung"). Die
+    Seitenzahl wird dazu als absolut positionierter <span> INNERHALB des
+    normalen .eyebrow-Divs uebergeben - die Textformatierung (Farbe, Schrift)
+    erbt der Span automatisch von .eyebrow, nur die Position wird ueberschrieben,
+    das restliche (leere) .eyebrow-Div nimmt weiterhin still seinen normalen
+    Flow-Platz oben links ein, stoert dort aber nicht mehr, weil es keinen
+    sichtbaren Inhalt mehr hat.
+    Der durch das Logo im Textbereich frei gewordene Platz geht ans Foto:
+    dessen Hoehe steigt von 540px auf 660px, margin-top von content-mid
+    entsprechend von 420px auf 540px angepasst, damit der Textblock weiter
+    exakt an der Fotokante beginnt.
     """
     return {
-        "eyebrow": "1/9",
+        "eyebrow": '<span style="position:absolute; top:44px; right:84px; z-index:3;">1/9</span>',
         "body": f'''
         <img src="data:image/png;base64,{foto_b64}" alt="" style="position:absolute; top:0; left:0; width:1080px; height:660px; object-fit:cover; z-index:0; pointer-events:none;"/>
-        <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="position:absolute; top:130px; left:84px; width:130px; z-index:2; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); pointer-events:none;"/>
+        <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="position:absolute; top:44px; left:44px; width:140px; z-index:2; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); pointer-events:none;"/>
         <div class="content-mid" style="align-items:flex-start; justify-content:center; margin-top:540px; margin-bottom:50px;">
           <div class="headline" style="font-size:78px; line-height:1.05; margin-top:0;">{cover_frage}</div>
         </div>
