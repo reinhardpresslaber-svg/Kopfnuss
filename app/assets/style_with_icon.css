@@ -106,6 +106,15 @@
     z-index:2;
     max-width: 820px;
   }
+  .topic-tag{
+    font-family:'Karla', sans-serif;
+    font-weight:700;
+    font-size: 26px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--rust);
+    z-index:2;
+  }
   .headline.big{
     font-size: 78px;
   }

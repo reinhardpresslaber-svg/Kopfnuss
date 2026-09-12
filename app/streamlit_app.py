@@ -234,7 +234,8 @@ if st.session_state.cover_optionen:
     if st.session_state.cover_bild_bytes:
         bild_b64_preview = base64.b64encode(st.session_state.cover_bild_bytes).decode("ascii")
         preview_html = render_cover_preview_html(
-            cover_frage_html, bild_b64=bild_b64_preview, theme=farbthema, bild_stil=st.session_state.cover_bild_stil
+            cover_frage_html, bild_b64=bild_b64_preview, theme=farbthema,
+            bild_stil=st.session_state.cover_bild_stil, thema=thema,
         )
         st.components.v1.html(preview_html, height=470)
 
@@ -317,6 +318,7 @@ if st.session_state.cover_optionen:
                     fazit_body,
                     bild_b64=bild_b64,
                     bild_stil=st.session_state.cover_bild_stil,
+                    thema=thema,
                 )
                 slug = slugify(thema)
                 render_ergebnis = render_carousel(

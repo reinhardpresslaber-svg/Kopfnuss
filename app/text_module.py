@@ -501,14 +501,16 @@ def proofread_slides_und_caption(slides_ergebnis, caption):
     }
 
 
-def assemble_slides(cover_frage, slides_2_bis_8, fazit_body, bild_b64=None, bild_stil="icon"):
+def assemble_slides(cover_frage, slides_2_bis_8, fazit_body, bild_b64=None, bild_stil="icon", thema=None):
     """Baut die vollstaendige 9er-Slide-Liste fuer render_carousel() zusammen.
     bild_stil waehlt die Cover-Slide-Variante: "icon" (Standard, transparente
-    Icon-Grafik) oder "foto" (vollflaechiges Foto-Hintergrundbild)."""
+    Icon-Grafik) oder "foto" (vollflaechiges Foto-Hintergrundbild). thema
+    wird, falls angegeben, als kleines Theorie-Label auf dem Cover ueber
+    der Headline gezeigt (z.B. "Soziale Identitätstheorie")."""
     if bild_stil == "foto" and bild_b64:
-        cover_slide = build_cover_slide_foto(cover_frage, bild_b64)
+        cover_slide = build_cover_slide_foto(cover_frage, bild_b64, thema=thema)
     else:
-        cover_slide = build_cover_slide(cover_frage, bild_b64=bild_b64)
+        cover_slide = build_cover_slide(cover_frage, bild_b64=bild_b64, thema=thema)
     slides = [cover_slide]
     for i, s in enumerate(slides_2_bis_8, start=2):
         eyebrow = f"{i}/9"

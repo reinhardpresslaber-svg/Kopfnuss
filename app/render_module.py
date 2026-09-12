@@ -99,9 +99,12 @@ BLOBS = [
 BGS = ["bg", "bg-alt", "bg", "bg-alt", "bg", "bg-alt", "bg", "bg-alt", "bg"]
 
 
-def build_cover_slide(cover_frage, bild_b64=None):
+def build_cover_slide(cover_frage, bild_b64=None, thema=None):
     """Baut Slide 1 (Cover): Logo + Cover-Frage, optional mit generiertem
-    Motiv als zusaetzliche Bildebene (zwischen den Blobs und dem Text)."""
+    Motiv als zusaetzliche Bildebene (zwischen den Blobs und dem Text).
+    thema (z.B. "Soziale Identitätstheorie") wird, falls angegeben, als
+    kleines Theorie-Label ueber der Headline eingeblendet, damit auch ohne
+    Bildunterschrift sofort klar ist, um welches Konzept es geht."""
     bild_layer = ""
     if bild_b64:
         bild_layer = (
@@ -109,12 +112,17 @@ def build_cover_slide(cover_frage, bild_b64=None):
             f'style="position:absolute; top:-90px; left:-84px; width:1080px; height:1440px; '
             f'object-fit:contain; opacity:0.3; z-index:1; pointer-events:none;"/>'
         )
+    topic_tag = (
+        f'<div class="topic-tag" style="margin-top:24px;">{html_module.escape(thema)}</div>'
+        if thema else ""
+    )
     return {
         "eyebrow": "1/9",
         "body": f'''
         {bild_layer}
         <div class="content-mid" style="align-items:flex-start;">
           <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="width:160px;"/>
+          {topic_tag}
           <div class="headline" style="font-size:88px; line-height:1.02; margin-top:34px;">{cover_frage}</div>
         </div>
         ''',
@@ -123,7 +131,7 @@ def build_cover_slide(cover_frage, bild_b64=None):
     }
 
 
-def build_cover_slide_foto(cover_frage, foto_b64):
+def build_cover_slide_foto(cover_frage, foto_b64, thema=None):
     """
     Baut Slide 1 (Cover) als Foto-Variante: ein realistisches Foto (siehe
     image_module.generate_cover_foto()) als fest umrissener Block, der bis
@@ -173,14 +181,20 @@ def build_cover_slide_foto(cover_frage, foto_b64):
     ca. 33px, Fusszeile weiterhin komfortabel im Rahmen (unveraendert bei
     y=1370 von 1440, da bei dieser Headlinelaenge noch nicht der limitierende
     Faktor).
+    thema (z.B. "Soziale Identitätstheorie") wird, falls angegeben, als
+    kleines Theorie-Label direkt ueber der Headline eingeblendet.
     """
+    topic_tag = (
+        f'<div class="topic-tag">{html_module.escape(thema)}</div>' if thema else ""
+    )
     return {
         "eyebrow": '<span style="position:absolute; top:44px; right:84px; z-index:3;">1/9</span>',
         "body": f'''
         <img src="data:image/png;base64,{foto_b64}" alt="" style="position:absolute; top:0; left:0; width:1080px; height:700px; object-fit:cover; z-index:0; pointer-events:none;"/>
         <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="position:absolute; top:44px; left:44px; width:140px; z-index:2; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); pointer-events:none;"/>
         <div class="content-mid" style="align-items:flex-start; justify-content:center; margin-top:580px; margin-bottom:50px; padding-top:28px;">
-          <div class="headline" style="font-size:78px; line-height:1.05; margin-top:0;">{cover_frage}</div>
+          {topic_tag}
+          <div class="headline" style="font-size:78px; line-height:1.05; margin-top:8px;">{cover_frage}</div>
         </div>
         ''',
         "footer": "@KopfnussPsychologie",
@@ -402,18 +416,19 @@ html,body{{ margin:0; padding:0; }}
     }
 
 
-def render_cover_preview_html(cover_frage, bild_b64=None, theme="klassisch", bild_stil="icon"):
+def render_cover_preview_html(cover_frage, bild_b64=None, theme="klassisch", bild_stil="icon", thema=None):
     """
     Baut eine kompakte Vorschau NUR von Slide 1 (Cover) - z.B. um ein
     generiertes Cover-Bild direkt im Zusammenspiel mit Logo/Ueberschrift
     zu pruefen, ohne gleich alle 9 Slides generieren zu muessen. bild_stil
-    waehlt wie bei assemble_slides() zwischen "icon" und "foto".
+    waehlt wie bei assemble_slides() zwischen "icon" und "foto". thema wird,
+    falls angegeben, als kleines Theorie-Label ueber der Headline gezeigt.
     """
     green_override = THEMES[theme]
     if bild_stil == "foto" and bild_b64:
-        slide = build_cover_slide_foto(cover_frage, bild_b64)
+        slide = build_cover_slide_foto(cover_frage, bild_b64, thema=thema)
     else:
-        slide = build_cover_slide(cover_frage, bild_b64=bild_b64)
+        slide = build_cover_slide(cover_frage, bild_b64=bild_b64, thema=thema)
     slide_html = make_slide_div(0, slide, active=True)
     return f"""<!DOCTYPE html>
 <html lang="de">
