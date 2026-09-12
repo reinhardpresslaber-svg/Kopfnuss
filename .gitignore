@@ -16,8 +16,5 @@ Posts/
 slides_export_*/
 carousel_*.html
 
-# Lokale Start-Skripte und Tunnel-Log - nur fuer diesen Rechner, nie ins Repo
+# Lokales Start-Skript - nur fuer diesen Rechner, nie ins Repo
 App_starten.bat
-Fernzugriff_starten.bat
-Fernzugriff_starten.ps1
-_tunnel_log.txt
