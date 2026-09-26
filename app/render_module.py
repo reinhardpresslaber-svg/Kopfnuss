@@ -192,8 +192,8 @@ def build_cta_slide(fazit_html):
           <div class="headline">Fazit</div>
           {fazit_html}
           <div class="cta-line personal-cta" style="margin-top:40px; display:flex; align-items:center; gap:28px;">
-            <img src="data:image/jpeg;base64,{PROFILBILD_B64}" alt="Ansgar" style="width:150px; height:150px; border-radius:50%; object-fit:cover; flex-shrink:0; box-shadow:0 2px 10px rgba(0,0,0,0.18);"/>
-            <span>{LIKE_ICON_SVG} Interessanter Post? Ich freu mich &uuml;ber dein Like!</span>
+            <img src="data:image/jpeg;base64,{PROFILBILD_B64}" alt="Ansgar" style="width:220px; height:220px; border-radius:50%; object-fit:cover; flex-shrink:0; box-shadow:0 2px 10px rgba(0,0,0,0.18);"/>
+            <span>{LIKE_ICON_SVG} Interessanter Post?<br/>Ich freu mich &uuml;ber dein Like!</span>
           </div>
           <p class="cta-line" style="margin-top:184px;">{FOLLOW_ICON_SVG} Folge @KopfnussPsychologie</p>
           <p class="cta-line" style="margin-top:2px;">Wissenswertes aus Psychologie &amp; Coaching</p>
