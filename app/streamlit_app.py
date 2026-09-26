@@ -120,6 +120,7 @@ for key, default in [
     ("png_paths", None),
     ("cover_bild_bytes", None),
     ("cover_bild_stil", "foto"),
+    ("thema_label", ""),
     ("reel_text_lines", None),
     ("studien_vorschlaege", None),
     ("reel_cover_path", None),
@@ -177,8 +178,9 @@ kontext = recherche_als_kontext(st.session_state.recherche) if st.session_state.
 
 if st.button("Cover-Vorschläge generieren", disabled=not thema):
     with st.spinner("Claude überlegt sich 3 Formulierungen..."):
-        vorschlaege = generate_cover_optionen(thema, kontext=kontext)
-        st.session_state.cover_optionen = proofread_cover_optionen(vorschlaege)
+        cover_ergebnis = generate_cover_optionen(thema, kontext=kontext)
+        st.session_state.cover_optionen = proofread_cover_optionen(cover_ergebnis["vorschlaege"])
+        st.session_state.thema_label = cover_ergebnis["thema_bezeichnung"]
     st.session_state.slides_ergebnis = None
     st.session_state.render_ergebnis = None
     st.session_state.cover_bild_bytes = None
@@ -197,6 +199,10 @@ if st.session_state.cover_optionen:
     )
     cover_frage = f"{cover_teil1} {cover_teil2}".strip()
     cover_frage_html = f'{cover_teil1}<br/><span style="color:var(--rust);">{cover_teil2}</span>'
+    thema_label = st.text_input(
+        "Theorie/Konzept-Bezeichnung (klein über der Cover-Frage, kannst du hier anpassen):",
+        value=st.session_state.thema_label,
+    )
 
     st.header("4. Cover-Bild")
     bild_stil_auswahl = st.radio(
@@ -210,17 +216,17 @@ if st.session_state.cover_optionen:
     if st.button(bild_button_label):
         if bild_stil_auswahl == "foto":
             with st.spinner("Gemini erzeugt ein Foto mit Menschen..."):
-                st.session_state.cover_bild_bytes = generate_cover_foto(cover_frage, thema=thema)
+                st.session_state.cover_bild_bytes = generate_cover_foto(cover_frage, thema=thema_label)
         else:
             with st.spinner("Gemini erzeugt ein passendes Motiv..."):
-                st.session_state.cover_bild_bytes = generate_cover_bild(cover_frage, thema=thema)
+                st.session_state.cover_bild_bytes = generate_cover_bild(cover_frage, thema=thema_label)
         st.session_state.cover_bild_stil = bild_stil_auswahl
 
     if st.session_state.cover_bild_bytes:
         bild_b64_preview = base64.b64encode(st.session_state.cover_bild_bytes).decode("ascii")
         preview_html = render_cover_preview_html(
             cover_frage_html, bild_b64=bild_b64_preview, theme=farbthema,
-            bild_stil=st.session_state.cover_bild_stil, thema=thema,
+            bild_stil=st.session_state.cover_bild_stil, thema=thema_label,
         )
         st.components.v1.html(preview_html, height=470)
 
@@ -303,7 +309,7 @@ if st.session_state.cover_optionen:
                     fazit_body,
                     bild_b64=bild_b64,
                     bild_stil=st.session_state.cover_bild_stil,
-                    thema=thema,
+                    thema=thema_label,
                 )
                 slug = slugify(thema)
                 render_ergebnis = render_carousel(

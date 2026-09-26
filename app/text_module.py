@@ -103,12 +103,26 @@ COVER_TOOL = {
     "name": "cover_vorschlaege",
     "description": (
         "Reicht genau 3 Formulierungsvorschlaege fuer die Cover-Frage (Slide 1) "
-        "ein, jeweils aufgeteilt in teil1 und teil2."
+        "sowie die Theorie-Bezeichnung ein, jeweils aufgeteilt in teil1 und teil2."
     ),
     "strict": True,
     "input_schema": {
         "type": "object",
         "properties": {
+            "thema_bezeichnung": {
+                "type": "string",
+                "description": (
+                    "Der etablierte Fachbegriff/Name der psychologischen Theorie "
+                    "oder des Konzepts, um das es in diesem Post inhaltlich geht "
+                    "(z.B. 'Soziale Identitaetstheorie', 'Ankereffekt', "
+                    "'Broken-Windows-Theorie'). NICHT die Nutzer-Eingabe woertlich "
+                    "uebernehmen, falls diese nur ein loser Eingangsgedanke war "
+                    "(z.B. 'warum vergleichen wir uns mit anderen' -> "
+                    "'Soziale Vergleichstheorie') - leite den korrekten Fachbegriff "
+                    "selbst her. Kurz halten (2-4 Woerter), wird klein ueber der "
+                    "Cover-Frage angezeigt."
+                ),
+            },
             "vorschlaege": {
                 "type": "array",
                 "description": "Genau 3 Formulierungsvorschlaege, jeweils als teil1/teil2.",
@@ -140,7 +154,7 @@ COVER_TOOL = {
                 },
             }
         },
-        "required": ["vorschlaege"],
+        "required": ["thema_bezeichnung", "vorschlaege"],
         "additionalProperties": False,
     },
 }
@@ -211,11 +225,17 @@ def _tool_input(resp):
 
 
 def generate_cover_optionen(thema, kontext=""):
-    """Generiert 3 Cover-Frage-Vorschlaege (nur Text, kein Layout) fuer Slide 1."""
+    """Generiert 3 Cover-Frage-Vorschlaege (nur Text, kein Layout) fuer Slide 1
+    sowie die fachlich passende Theorie-Bezeichnung (thema_bezeichnung), die
+    als kleines Label ueber der Cover-Frage angezeigt wird - thema selbst ist
+    oft nur ein loser Eingangsgedanke des Nutzers, keine korrekte Fachbezeichnung.
+    Gibt ein Dict mit "thema_bezeichnung" und "vorschlaege" zurueck."""
     user_msg = (
         f"Thema: {thema}\n\n"
         + (f"Rechercheergebnisse/Kontext:\n{kontext}\n\n" if kontext else "")
-        + "Erzeuge 3 Formulierungsvorschlaege fuer die Cover-Frage auf Slide 1 - "
+        + "Ermittle zunaechst die fachlich korrekte Theorie-Bezeichnung (siehe "
+        "thema_bezeichnung im Werkzeug) und erzeuge dann 3 Formulierungsvorschlaege "
+        "fuer die Cover-Frage auf Slide 1 - "
         "soll ein echter Scroll-Stopper sein (spricht mit 'du' an, siehe "
         "Design-System Abschnitt 1). Nutze fuer die 3 Vorschlaege bewusst "
         "unterschiedliche Hook-Techniken: (a) Curiosity-Gap-Frage, die eine "
@@ -247,7 +267,11 @@ def generate_cover_optionen(thema, kontext=""):
         tool_choice={"type": "tool", "name": "cover_vorschlaege"},
         messages=[{"role": "user", "content": user_msg}],
     )
-    return _tool_input(resp)["vorschlaege"]
+    result = _tool_input(resp)
+    return {
+        "thema_bezeichnung": result["thema_bezeichnung"],
+        "vorschlaege": result["vorschlaege"],
+    }
 
 
 def generate_slides_und_caption(thema, cover_frage, kontext=""):
