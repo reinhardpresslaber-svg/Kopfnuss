@@ -99,7 +99,7 @@ def build_cover_slide(cover_frage, bild_b64=None, thema=None):
         <div class="content-mid" style="align-items:flex-start;">
           <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="width:160px;"/>
           {topic_tag}
-          <div class="headline" style="font-size:88px; line-height:1.02; margin-top:34px;">{cover_frage}</div>
+          <div class="headline" style="font-size:88px; line-height:1.02; margin-top:34px; text-wrap:balance;">{cover_frage}</div>
         </div>
         ''',
         "footer": "@KopfnussPsychologie",
@@ -170,7 +170,7 @@ def build_cover_slide_foto(cover_frage, foto_b64, thema=None):
         <img class="cover-logo" src="data:image/png;base64,{LOGO_B64}" alt="Kopfnuss Logo" style="position:absolute; top:44px; left:44px; width:140px; z-index:2; filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5)); pointer-events:none;"/>
         <div class="content-mid" style="align-items:flex-start; justify-content:center; margin-top:580px; margin-bottom:50px; padding-top:28px;">
           {topic_tag}
-          <div class="headline" style="font-size:78px; line-height:1.05; margin-top:8px;">{cover_frage}</div>
+          <div class="headline" style="font-size:78px; line-height:1.05; margin-top:8px; text-wrap:balance;">{cover_frage}</div>
         </div>
         ''',
         "footer": "@KopfnussPsychologie",
