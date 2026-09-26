@@ -18,6 +18,8 @@ with open(os.path.join(ASSETS_DIR, "style_with_icon.css"), encoding="utf-8") as 
     STYLE_BLOCK = f.read()
 with open(os.path.join(ASSETS_DIR, "logo_full_transparent_b64.txt")) as f:
     LOGO_B64 = f.read().strip()
+with open(os.path.join(ASSETS_DIR, "profilbild_ansgar_b64.txt")) as f:
+    PROFILBILD_B64 = f.read().strip()
 
 # Gruenes Farbthema: ueberschreibt nur die Akzentfarben (--rust, --gold, --moss).
 # Leerer String = klassisches Terrakotta/Gold-Theme (Standard-CSS unveraendert).
@@ -39,27 +41,11 @@ THEMES = {
 
 BGMAP = {"bg": "#FBF6EF", "bg-alt": "#F2E6D3"}
 
-BOOKMARK_ICON_SVG = (
+LIKE_ICON_SVG = (
     '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" '
     'stroke="currentColor" stroke-width="2.4" stroke-linecap="round" '
     'stroke-linejoin="round" style="flex-shrink:0; vertical-align:-6px;">'
-    '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>'
-    '</svg>'
-)
-
-SHARE_ICON_SVG = (
-    '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" '
-    'stroke="currentColor" stroke-width="2.4" stroke-linecap="round" '
-    'stroke-linejoin="round" style="flex-shrink:0;">'
-    '<path d="M22 2 11 13"/>'
-    '<path d="M22 2 15 22 11 13 2 9 22 2Z"/>'
-    '</svg>'
-)
-
-REPOST_ICON_SVG = (
-    '<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" '
-    'style="flex-shrink:0;">'
-    '<path d="M7 7h10v3l5-4-5-4v3H5v6h2V7zm10 10H7v-3l-5 4 5 4v-3h12v-6h-2v4z"/>'
+    '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/>'
     '</svg>'
 )
 
@@ -71,16 +57,6 @@ FOLLOW_ICON_SVG = (
     '<circle cx="8.5" cy="7" r="4"/>'
     '<line x1="20" y1="8" x2="20" y2="14"/>'
     '<line x1="23" y1="11" x2="17" y2="11"/>'
-    '</svg>'
-)
-
-# Farbe fest auf --ink gesetzt (statt currentColor), damit das Herz
-# garantiert dunkel/schwarz bleibt statt in Emoji-Rot zu erscheinen.
-HEART_ICON_SVG = (
-    '<svg width="20" height="20" viewBox="0 0 24 24" fill="#2C2420" '
-    'style="flex-shrink:0; vertical-align:-3px; margin-left:4px;">'
-    '<path d="M12 21s-7.44-4.35-10-9.03C0.28 8.62 1.7 5 5.4 5c2.1 0 3.6 1.2 4.6 2.73'
-    'C11 6.2 12.5 5 14.6 5c3.7 0 5.12 3.62 3.4 6.97C19.44 16.65 12 21 12 21z"/>'
     '</svg>'
 )
 
@@ -203,17 +179,23 @@ def build_cover_slide_foto(cover_frage, foto_b64, thema=None):
 
 
 def build_cta_slide(fazit_html):
-    """Baut Slide 9 (Fazit + CTA): fazit_html ist der freie Fazit-Text, Rest (Icons/Claim) ist fest."""
+    """Baut Slide 9 (Fazit + CTA): fazit_html ist der freie Fazit-Text, Rest
+    (Icons/Claim) ist fest. Enthaelt zusaetzlich ein grosses, rundes Profilfoto
+    mit persoenlicher Like-Aufforderung direkt unter dem Fazit-Text, um mehr
+    persoenliche Verbindung zum Account herzustellen. Speichern/Teilen/
+    Reposten-CTAs bewusst weggelassen (Feedback: zu viele CTAs) - nur noch
+    Like (persoenlich) und Folgen bleiben stehen."""
     return {
         "eyebrow": "9/9 &mdash; Fazit",
         "body": f'''
         <div class="content-mid">
           <div class="headline">Fazit</div>
           {fazit_html}
-          <p class="cta-line" style="margin-top:45px;">{BOOKMARK_ICON_SVG} Speichern</p>
-          <p class="cta-line" style="margin-top:14px;">{SHARE_ICON_SVG} Interessant? Danke f&uuml;rs Teilen {HEART_ICON_SVG}</p>
-          <p class="cta-line" style="margin-top:14px;">{REPOST_ICON_SVG} Interessant? Danke f&uuml;rs Reposten {HEART_ICON_SVG}</p>
-          <p class="cta-line" style="margin-top:14px;">{FOLLOW_ICON_SVG} Folge @KopfnussPsychologie</p>
+          <div class="cta-line personal-cta" style="margin-top:40px; display:flex; align-items:center; gap:28px;">
+            <img src="data:image/jpeg;base64,{PROFILBILD_B64}" alt="Ansgar" style="width:150px; height:150px; border-radius:50%; object-fit:cover; flex-shrink:0; box-shadow:0 2px 10px rgba(0,0,0,0.18);"/>
+            <span>{LIKE_ICON_SVG} Interessanter Post? Ich freu mich &uuml;ber dein Like!</span>
+          </div>
+          <p class="cta-line" style="margin-top:184px;">{FOLLOW_ICON_SVG} Folge @KopfnussPsychologie</p>
           <p class="cta-line" style="margin-top:2px;">Wissenswertes aus Psychologie &amp; Coaching</p>
         </div>
         ''',
