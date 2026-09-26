@@ -210,10 +210,10 @@ if st.session_state.cover_optionen:
     if st.button(bild_button_label):
         if bild_stil_auswahl == "foto":
             with st.spinner("Gemini erzeugt ein Foto mit Menschen..."):
-                st.session_state.cover_bild_bytes = generate_cover_foto(cover_frage)
+                st.session_state.cover_bild_bytes = generate_cover_foto(cover_frage, thema=thema)
         else:
             with st.spinner("Gemini erzeugt ein passendes Motiv..."):
-                st.session_state.cover_bild_bytes = generate_cover_bild(cover_frage)
+                st.session_state.cover_bild_bytes = generate_cover_bild(cover_frage, thema=thema)
         st.session_state.cover_bild_stil = bild_stil_auswahl
 
     if st.session_state.cover_bild_bytes:

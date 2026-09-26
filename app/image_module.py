@@ -27,7 +27,7 @@ CHROMA_KEY = (255, 0, 255)  # reines Magenta, kommt in unserer Palette nicht vor
 
 PROMPT_TEMPLATE = """Erstelle ein einzelnes, freigestelltes Icon-/Diagramm-Motiv (kein flaechendeckendes Hintergrundbild) fuer eine Instagram-Cover-Slide zum Thema Psychologie/Coaching. Das Motiv wird spaeter freigestellt auf einer bereits vorhandenen Seite platziert.
 
-Zentrale Frage/Thema des Motivs: "{cover_frage}"
+Zentrale Frage/Thema des Motivs: "{cover_frage}"{thema_hinweis}
 
 Stil (wichtig, genau einhalten):
 - Flaches Icon-Design: eine Mischung aus duennen Linien UND ausgefuellten/flaechigen Formen (nicht nur Umrisse) - wie ein modernes Icon-Set, nicht wie eine Bleistiftskizze
@@ -160,13 +160,18 @@ def _clean_resize_haze(img):
     return Image.fromarray(data, "RGBA")
 
 
-def generate_cover_bild(cover_frage):
+def generate_cover_bild(cover_frage, thema=None):
     """
     Generiert ein freigestelltes, kompakt zugeschnittenes Cover-Motiv
-    (transparentes PNG) fuer die gegebene Cover-Frage. Gibt die
-    PNG-Bytes zurueck.
+    (transparentes PNG) fuer die gegebene Cover-Frage. thema (z.B. "Sozialer
+    Vergleich") wird, falls angegeben, zusaetzlich zur Cover-Frage an Gemini
+    uebergeben - die Cover-Frage allein ist oft ein kurzer, zugespitzter Hook
+    ohne den fachlichen Begriff dahinter, das explizite Thema/die Theorie
+    gibt Gemini mehr Kontext fuer ein treffenderes Motiv. Gibt die PNG-Bytes
+    zurueck.
     """
-    prompt = PROMPT_TEMPLATE.format(cover_frage=cover_frage)
+    thema_hinweis = f'\nZugrundeliegende Theorie/Konzept: "{thema}"' if thema else ""
+    prompt = PROMPT_TEMPLATE.format(cover_frage=cover_frage, thema_hinweis=thema_hinweis)
     client = _client()
     response = client.models.generate_content(
         model=MODEL,
@@ -195,9 +200,13 @@ def generate_cover_bild(cover_frage):
 
 PROMPT_TEMPLATE_FOTO = """Erstelle ein modernes, kunstvolles Foto im Stil eines zeitgenoessischen Editorial-/Fine-Art-Portraitshootings (z.B. wie ein aktuelles Magazin-Cover oder eine Galerie-Fotografie - KEIN generisches, beliebiges Corporate-/Lifestyle-Stockfoto) fuer die Titelseite eines Instagram-Posts zum Thema Psychologie/Coaching. Das Foto wird als fest umrissener Bildblock am oberen Rand der Seite verwendet (kein Freistellen noetig, kein Verlauf - darunter folgt eine harte Kante zu einer einfarbigen Flaeche mit Text).
 
-WICHTIGSTE REGEL, UNBEDINGT EINHALTEN: Das Bild selbst ist ein reines, digitales Foto OHNE jeden Rahmen - KEIN weisser oder cremefarbener Rand, KEIN Passepartout, KEINE Bordüre, KEINE Vignette, KEIN sichtbarer Fotoabzug/Print-Look mit Papierrand um die Szene herum. Auch die "Editorial-/Fine-Art"-Anmutung bezieht sich NUR auf Licht und Bildsprache, NICHT auf einen physischen Print oder Rahmen als Bildelement. Die Aufnahme fuellt die gesamte Bildflaeche bis zum allerletzten Pixel an allen vier Kanten aus.
+WICHTIGSTE REGELN - UNBEDINGT UND KOMPROMISSLOS EINHALTEN, WICHTIGER ALS ALLES ANDERE IN DIESEM PROMPT:
 
-Zentrale Frage/Thema des Posts: "{cover_frage}"
+1. KEIN RAHMEN: Das Bild selbst ist ein reines, digitales Foto OHNE jeden Rahmen - KEIN weisser oder cremefarbener Rand, KEIN Passepartout, KEINE Bordüre, KEINE Vignette, KEIN sichtbarer Fotoabzug/Print-Look mit Papierrand um die Szene herum. Auch die "Editorial-/Fine-Art"-Anmutung bezieht sich NUR auf Licht und Bildsprache, NICHT auf einen physischen Print oder Rahmen als Bildelement. Stattdessen: Das Foto fuellt das komplette zugewiesene Bildformat (das volle Seitenverhaeltnis der Anfrage) luecken- und randlos aus - jeder einzelne Pixel bis zu allen vier Kanten zeigt Bildinhalt der eigentlichen Szene, sonst nichts.
+
+2. KEIN TEXT: Das Bild enthaelt UNTER KEINEN UMSTAENDEN Text irgendeiner Art - keine Buchstaben, Zahlen, Woerter, Saetze, Logos oder Beschriftungen. Das gilt ausnahmslos, auch nicht einzeln, klein oder beilaeufig im Hintergrund - auch nicht auf Schildern, Bildschirmen, Kleidung, Tassen, Buchruecken oder sonstigen Requisiten im Bild.
+
+Zentrale Frage/Thema des Posts: "{cover_frage}"{thema_hinweis}
 
 Motiv:
 - WICHTIGSTES ZIEL - Storytelling: Das Bild soll die Frage/das Thema oben ("{cover_frage}") konkret ERZAEHLEN, nicht nur allgemein illustrieren. Ueberlege dir eine nachvollziehbare, spezifische Alltagsszene, die genau diese Situation zeigt (passende Handlung, Requisiten, Umgebung, Interaktion zwischen den Personen - was tun sie gerade, warum, was ist der Ausloeser?). Wer das Bild sieht, soll auch ohne den Text zu lesen erahnen koennen, worum es im Post geht - keine austauschbare, allgemeine "nachdenkliche Person"-Pose ohne erkennbaren inhaltlichen Bezug zum Thema
@@ -211,14 +220,14 @@ Stil:
 - Modernes, kunstvolles Editorial-/Fine-Art-Licht: kraeftiges, gerichtetes Licht mit klaren Kontrasten/Schatten (z.B. hartes Seitenlicht oder starkes Fensterlicht) statt diffusem, flachem "Lifestyle"-Licht
 - Reduzierte, bewusst gewaehlte Farbpalette - gerne mit Anklaengen an Terrakotta (#C15A2E), Salbeigruen (#8FBFA0) oder Creme (#FBF6EF) in Kleidung/Umgebung, ruhig und hochwertig statt bunt/beliebig
 - Fotorealistisch, KEINE Illustration, KEIN 3D-Render, KEIN Comic-/Cartoon-Stil
-- UNBEDINGT BEACHTEN: Das Bild darf UNTER KEINEN UMSTAENDEN laufenden Text, Woerter, Saetze oder Logos enthalten (bei laengeren KI-generierten Texten sieht das schnell verstuemmelt/kaputt aus). Ausnahme: EINZELNE, kurze Buchstaben oder Zahlen (z.B. "A"/"B" auf zwei Requisiten, eine "3" auf einem Schild) sind erlaubt, aber NUR wenn sie inhaltlich direkt zur Storytelling-Idee gehoeren (siehe erster Motiv-Punkt) und klar lesbar bleiben - keine laengeren Woerter oder Phrasen
+- UNBEDINGT BEACHTEN: Das Bild darf UNTER KEINEN UMSTAENDEN Text, Buchstaben, Zahlen, Woerter, Saetze oder Logos enthalten - auch keine einzelnen Buchstaben oder Zahlen auf Schildern, Requisiten oder Bildschirmen. Erzaehle die Gruppenzugehoerigkeit stattdessen rein visuell (z.B. durch Kleidungsfarbe, Position im Raum, Requisiten ohne Beschriftung) statt durch Labels wie "A"/"B"
 - UNBEDINGT BEACHTEN: Das Foto muss randlos/vollflaechig bis zum Bildrand gehen - KEIN weisser/cremefarbener Rahmen, KEIN Passepartout, KEIN Rand, KEINE Bordüre um das Foto herum, auch nicht als "Fine-Art-Print"-Stilmittel. Die Szene fuellt das gesamte Bild bis zu allen vier Kanten aus.
 
 Format: Querformat-aehnlicher Bildausschnitt (wird oben auf der Seite als breiter Streifen genutzt, randlos/vollflaechig). Das Hauptmotiv mittig positionieren, mit ausreichend Luft zu allen vier Bildraendern innerhalb der Szene selbst (nichts wird angeschnitten) - aber OHNE einen umlaufenden Rahmen/Rand als eigenes Bildelement.
 """
 
 
-def generate_cover_foto(cover_frage):
+def generate_cover_foto(cover_frage, thema=None):
     """
     Generiert ein realistisches Foto-Motiv mit Menschen fuer Slide 1 -
     Alternative zur Icon-Illustration (generate_cover_bild()), fuer ein
@@ -227,9 +236,15 @@ def generate_cover_foto(cover_frage):
     Slide-Rand verwendet, daher hier im Breitformat "16:9" generiert statt
     im Hochformat wie beim Icon-Motiv - object-fit:cover schneidet sonst
     zu viel vom Hochformat-Bild weg. Kein Freistellen/Chroma-Key noetig,
-    da das Foto opak verwendet wird. Gibt PNG-Bytes zurueck.
+    da das Foto opak verwendet wird. thema (z.B. "Soziale Identitaetstheorie")
+    wird, falls angegeben, zusaetzlich zur Cover-Frage an Gemini uebergeben -
+    die Cover-Frage allein ist oft ein kurzer, zugespitzter Hook ohne den
+    fachlichen Begriff dahinter, das explizite Thema/die Theorie gibt Gemini
+    mehr Kontext fuer eine treffendere Storytelling-Szene. Gibt PNG-Bytes
+    zurueck.
     """
-    prompt = PROMPT_TEMPLATE_FOTO.format(cover_frage=cover_frage)
+    thema_hinweis = f'\nZugrundeliegende Theorie/Konzept: "{thema}"' if thema else ""
+    prompt = PROMPT_TEMPLATE_FOTO.format(cover_frage=cover_frage, thema_hinweis=thema_hinweis)
     client = _client()
     response = client.models.generate_content(
         model=MODEL,
